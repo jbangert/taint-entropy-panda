@@ -3,7 +3,7 @@
 set -e
 
 # creates api code for plugins
-python ../scripts/apigen.py
+python2 ../scripts/apigen.py
 
 # creates pandalog code
 sh ./pp.sh
