@@ -42,6 +42,7 @@ echo $LLVM_BIT
 $LLVM_BIT \
 --extra-cflags="-O2 -I/usr/local/include" \
 --extra-cxxflags="-O2" \
---extra-ldflags="-L/usr/local/lib -L/usr/local/lib64 -L/usr/local/lib -lprotobuf-c -lprotobuf -lpthread"
+            --extra-ldflags="-L/usr/local/lib -L/usr/local/lib64 -L/usr/local/lib -lprotobuf-c -lprotobuf -lpthread" \
+            --python=/usr/bin/python2
 
 make -j $(nproc)
