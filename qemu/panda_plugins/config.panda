@@ -43,3 +43,4 @@ ida_taint
 tainted_instr
 pmemaccess
 tentropy
+cryptofind
