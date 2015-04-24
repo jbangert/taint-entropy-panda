@@ -129,10 +129,10 @@ int before_block_exec(CPUState *env, TranslationBlock *tb){
   } else {
     if(!heuristic(cumulative)){
       //The last block we executed was the last crypto block
+      dump_memsets();
+      memtrace(CRYPTO_END,rr_get_guest_instr_count(),0);
       tracing = false;
       panda_disable_memcb();
-      dump_memsets();
-      memtrace(CRYPTO_BEGIN,rr_get_guest_instr_count(),0);
     } else {
       cumulative.total_instr  +=  blk.total_instr;
       cumulative.arith_instr  +=  blk.arith_instr;
