@@ -15,12 +15,14 @@ extern "C" {
 #include "panda_plugin.h"
 #include "panda_common.h"
 #include "pandalog.h"
+#include  "rr_log.h"
 #include "panda_plugin_plugin.h"
 #include "../callstack_instr/callstack_instr.h"
 }
 
 #include "iclass.h"
 
+#define RAM_SIZE 512*1024*1024
 //#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,11 +46,14 @@ void uninit_plugin(void *);
 
 }
 //XXX: Do this on a per-address space basis
-std::unordered_map<target_ulong , blockinfo> block_infos;
+//std::unordered_map<target_ulong , blockinfo> block_infos;
+std::vector<blockinfo> block_infos;
+std::unordered_map<target_ulong, uint8_t> read_set;
+std::unordered_map<target_ulong, uint8_t> write_set;
 blockinfo cumulative;
 bool tracing;
 void *plugin_self;
-FILE *memtrace;
+FILE *f_memtrace;
 #include "memtrace.h"
 #ifdef TARGET_I386
 static inline bool heuristic(blockinfo &blk){
@@ -57,6 +62,10 @@ static inline bool heuristic(blockinfo &blk){
 int after_block_translate(CPUState *env, TranslationBlock *tb){
   
   target_phys_addr_t physaddr = panda_virt_to_phys(env,tb->pc);
+  if(physaddr >= RAM_SIZE){
+    fprintf(stderr,"physaddr outside of ram %lX\n", physaddr);
+    return 0;
+  }
   unsigned char *buf = (unsigned char *) malloc(tb->size);
   int err = panda_virtual_memory_rw(env, tb->pc, buf, tb->size, 0);
   if(err == -1){
@@ -70,46 +79,60 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   }
   return 0;
 }
-static void print_memaccess(trace_type t,target_ulong pc, target_ulong addr, target_ulong size, void *buf){
+static void memtrace(trace_type t, target_ulong addr, char buf){
   if(!tracing)
     return;
   trace_message m;
   m.type= t;
-  m.pc = pc;
   m.addr = addr;
-  m.size = size;
-  if(size>8){
-    printf("Crypto\t%u\t" "%lx\t" "%lX\t" "%lX\t",t,(unsigned long)pc,(unsigned long)addr, (unsigned long)size);
-    fprintf(stderr,"Write larger than 8, size=%lX\n", (unsigned long) size);
-  } else {
-    memcpy(m.data,buf,size);
-  }
-  fwrite(&m,sizeof m,1,memtrace);
+  m.data = buf;
+  fwrite(&m,sizeof m,1,f_memtrace);
 }
-int vmem_write(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
-  print_memaccess(CRYPTO_WRITE, pc,addr,size,buf);
+static void dump_memsets(){
+  for(auto &c : read_set){
+    memtrace(CRYPTO_READ,c.first,c.second);
+  }
+  for(auto &c : write_set){
+    memtrace(CRYPTO_WRITE,c.first,c.second);
+  }
+  memtrace(CRYPTO_END,0,0);
+  
+}
+
+int vmem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
+  if(!tracing) return 0;
+  for(target_ulong i=0;i<size;i++)
+    read_set.emplace(addr+i, *((uint8_t *)buf + i));
   return 0;
 }
-int vmem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
-  print_memaccess(CRYPTO_READ, pc,addr,size,buf);
+int vmem_write(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
+  if(!tracing) return 0;
+  for(target_ulong i=0;i<size;i++)
+    write_set[addr+i] = *((uint8_t *)buf + i);
   return 0;
 }
 int before_block_exec(CPUState *env, TranslationBlock *tb){
   target_phys_addr_t physaddr = panda_virt_to_phys(env,tb->pc);
+  if(physaddr >= RAM_SIZE){
+    return 0;
+  }
   blockinfo &blk = block_infos[physaddr];
   if(!tracing){
     if(heuristic(blk)){
       cumulative = blk;
       tracing = true;
       panda_enable_memcb();
-      print_memaccess(CRYPTO_BEGIN,0,0,0,NULL);
+      read_set.clear();
+      write_set.clear();
+      memtrace(CRYPTO_BEGIN,rr_get_guest_instr_count(),0);
     }
   } else {
     if(!heuristic(cumulative)){
       //The last block we executed was the last crypto block
       tracing = false;
-      panda_disable_memcb(); 
-      print_memaccess(CRYPTO_END,0,0,0,NULL);
+      panda_disable_memcb();
+      dump_memsets();
+      memtrace(CRYPTO_BEGIN,rr_get_guest_instr_count(),0);
     } else {
       cumulative.total_instr  +=  blk.total_instr;
       cumulative.arith_instr  +=  blk.arith_instr;
@@ -122,6 +145,8 @@ int before_block_exec(CPUState *env, TranslationBlock *tb){
 extern void init_icls();
 bool init_plugin(void *self) {
   #ifdef TARGET_I386
+  block_infos.resize(RAM_SIZE);
+  fprintf(stderr,"Initializing ram_size, %lX with %u per element\n",RAM_SIZE,sizeof(struct blockinfo));
     printf ("Initializing cryptofind\n");
     plugin_self = self;
     init_icls();
@@ -141,7 +166,7 @@ bool init_plugin(void *self) {
     // PPP_REG_CB("callstack_instr", on_call, tentropy_oncall);
     //PPP_REG_CB("callstack_instr", on_ret, tentropy_onret);
     #endif
-    memtrace = fopen("memtrace","wb");
+    f_memtrace = fopen("memtrace","wb");
     cumulative = {0,0};
     tracing = false;
     return true;
