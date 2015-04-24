@@ -9,6 +9,6 @@
 struct blockinfo{
   int total_instr, arith_instr;
 };
-extern uint8_t icls[65536];
+extern char icls[65536];
 extern blockinfo get_block_stats(const uint8_t *buf, unsigned long pc, size_t size, bool use64bit);
 #endif

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "iclass.h"
 #include <distorm.h>
 #include <string.h>
