@@ -55,11 +55,15 @@ extern "C" {
 
 PPP_PROT_REG_CB(on_call);
 PPP_PROT_REG_CB(on_ret);
+PPP_PROT_REG_CB(on_call_ext);
+PPP_PROT_REG_CB(on_ret_ext);
 
 }
 
 PPP_CB_BOILERPLATE(on_call);
 PPP_CB_BOILERPLATE(on_ret);
+PPP_CB_BOILERPLATE(on_call_ext);
+PPP_CB_BOILERPLATE(on_ret_ext);
 
 enum instr_type {
   INSTR_UNKNOWN = 0,
@@ -291,7 +295,16 @@ int after_block_translate(CPUState *env, TranslationBlock *tb) {
     
     return 1;
 }
-
+static callstack_id export_stackid(CPUState *env, target_ulong pc){
+  #ifdef USE_STACK_HEURISTIC
+  auto x = get_stackid(env,pc);
+  callstack_id ret ={x.first, x.second};
+  #else
+  callstack_id ret = {get_stackid(env,pc),0};
+#endif
+                        
+  return ret;
+}
 int before_block_exec(CPUState *env, TranslationBlock *tb) {
     std::vector<stack_entry> &v = callstacks[get_stackid(env,tb->pc)];
     std::vector<target_ulong> &w = function_stacks[get_stackid(env,tb->pc)];
@@ -299,11 +312,12 @@ int before_block_exec(CPUState *env, TranslationBlock *tb) {
 
     // Search up to 10 down
     for (int i = v.size()-1; i > ((int)(v.size()-10)) && i >= 0; i--) {
-        if (tb->pc == v[i].pc) {
+      if (tb->pc == v[i].pc) {
             //printf("Matched at depth %d\n", v.size()-i);
             v.erase(v.begin()+i, v.end());
 
             PPP_RUN_CB(on_ret, env, w[i]);
+            PPP_RUN_CB(on_ret_ext, env, w[i], export_stackid(env, tb->pc)); 
             w.erase(w.begin()+i, w.end());
 
             break;
@@ -328,6 +342,7 @@ int after_block_exec(CPUState *env, TranslationBlock *tb, TranslationBlock *next
         function_stacks[get_stackid(env,tb->pc)].push_back(pc);
 
         PPP_RUN_CB(on_call, env, pc);
+        PPP_RUN_CB(on_call_ext, env, pc, export_stackid(env, tb->pc));
     }
     else if (tb_type == INSTR_RET) {
         //printf("Just executed a RET in TB " TARGET_FMT_lx "\n", tb->pc);
