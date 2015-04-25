@@ -175,4 +175,6 @@ bool init_plugin(void *self) {
 
 
 void uninit_plugin(void *self) {
+  fflush(f_memtrace);
+  fclose(f_memtrace);
 }
