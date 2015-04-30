@@ -79,7 +79,7 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   }
   return 0;
 }
-static void memtrace(trace_type t, target_ulong addr, char buf){
+static void memtrace(int t, target_ulong addr, char buf){
   if(!tracing)
     return;
   trace_message m;
@@ -94,9 +94,7 @@ static void dump_memsets(){
   }
   for(auto &c : write_set){
     memtrace(CRYPTO_WRITE,c.first,c.second);
-  }
-  memtrace(CRYPTO_END,0,0);
-  
+  }  
 }
 
 int vmem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
