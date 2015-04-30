@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "../../panda/panda_addr.h"
 
 typedef void *LabelSetP;
 
@@ -18,15 +19,17 @@ int taint2_enabled(void);
 // label this phys addr in memory with label l
 void taint2_label_ram(uint64_t pa, uint32_t l);
 
-// if phys addr pa is untainted, return 0.
-// else returns label set cardinality 
+// query fns return 0 if untainted, else cardinality of taint set
+uint32_t taint2_query(Addr a);
 uint32_t taint2_query_ram(uint64_t pa);
-
-// if offset of reg is untainted, ...
 uint32_t taint2_query_reg(int reg_num, int offset);
-
-// if offset of llvm reg is untainted, ...
 uint32_t taint2_query_llvm(int reg_num, int offset);
+
+// returns taint compute number associated with addr
+uint32_t taint2_query_tcn(Addr a);
+uint32_t taint2_query_tcn_ram(uint64_t pa);
+uint32_t taint2_query_tcn_reg(int reg_num, int offset);
+uint32_t taint2_query_tcn_llvm(int reg_num, int offset);
 
 // delete taint from this phys addr
 void taint2_delete_ram(uint64_t pa) ;
@@ -59,5 +62,13 @@ uint32_t taint2_num_labels_applied(void);
 
 // Track whether taint state actually changed during a BB
 void taint2_track_taint_state(void);
+
+
+// queries taint on this virtual addr and, if any taint there,
+// writes an entry to pandalog with lots of stuff like
+// label set, taint compute #, call stack
+// offset is needed since this is likely a query in the middle of an extent (of 4, 8, or more bytes)
+uint8_t taint2_query_pandalog (Addr addr, uint32_t offset) ;
+
 
 #endif                                                                                   

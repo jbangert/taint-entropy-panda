@@ -24,6 +24,9 @@ extern "C" {
 #include "panda_plugin.h"
 #include "panda_plugin_plugin.h"
 
+#include "pandalog.h"
+#include "panda/panda_addr.h"
+
 }
 
 #include <map>
@@ -31,6 +34,10 @@ extern "C" {
 
 #include "../taint2/taint2.h"
 #include "../taint2/taint2_ext.h"
+
+// NB: callstack_instr_ext needs this, sadly
+#include "../common/prog_point.h"
+#include "../callstack_instr/callstack_instr_ext.h"
 
 // These need to be extern "C" so that the ABI is compatible with
 // QEMU/PANDA, which is written in C
@@ -42,35 +49,37 @@ void taint_change(void);
 
 }
 
-std::map<target_ulong, std::set<target_ulong> > tainted_instrs;
+target_ulong last_asid = 0;
 
-void taint_change() {
-    extern CPUState *cpu_single_env;
-    CPUState *env = cpu_single_env;
-    target_ulong asid = panda_current_asid(env);
-
-    tainted_instrs[asid].insert(panda_current_pc(env));
+void taint_change(Addr a) {
+    if (taint2_query(a)) {
+        extern CPUState *cpu_single_env;
+        CPUState *env = cpu_single_env;
+        target_ulong asid = panda_current_asid(env);
+        if (asid != last_asid) {
+            Panda__LogEntry ple = PANDA__LOG_ENTRY__INIT;
+            ple.has_asid = 1;
+            ple.asid = asid;
+            pandalog_write_entry(&ple);           
+            last_asid = asid;
+        }
+        Panda__LogEntry ple = PANDA__LOG_ENTRY__INIT;
+        ple.tainted_instr = true;
+        pandalog_write_entry(&ple);
+        taint2_query_pandalog(a,0);    
+        callstack_pandalog();
+    }
 }
 
 bool init_plugin(void *self) {
     panda_require("taint2");
-
-    PPP_REG_CB("taint2", on_taint_change, taint_change);
-
     assert(init_taint2_api());
+    panda_require("callstack_instr");
+    assert (init_callstack_instr_api());
+    PPP_REG_CB("taint2", on_taint_change, taint_change);
     taint2_track_taint_state();
-
     return true;
 }
 
 void uninit_plugin(void *self) {
-    printf("Tainted instructions: \n");
-    for (auto &&asid_kv : tainted_instrs) {
-        target_ulong asid = asid_kv.first;
-        printf(TARGET_FMT_lx ": \n", asid);
-        for (auto pc : asid_kv.second) {
-            printf(TARGET_FMT_lx ", ", pc);
-        }
-        printf("\n");
-    }
 }

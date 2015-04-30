@@ -1,5 +1,7 @@
 #define __STDC_FORMAT_MACROS
 
+#include "panda/panda_addr.h"
+
 #include "../taint2/taint2.h"
 
 extern "C" {
@@ -11,7 +13,6 @@ extern "C" {
 #include "pandalog.h"
 #include "panda_common.h"
 #include "../syscalls2/gen_syscalls_ext_typedefs_linux_x86.h"
-#include "../taint/taint_ext.h"
 #include "../taint2/taint2_ext.h"
 #include "panda_plugin_plugin.h" 
     
@@ -29,7 +30,6 @@ extern "C" {
 double prob_label_u32 = 0;
 const char *taint_filename = 0;
 bool positional_labels = true;
-bool use_taint2 = true;
 bool no_taint = true;
 
 #define MAX_FILENAME 256
@@ -37,33 +37,19 @@ bool saw_open = false;
 uint32_t the_asid = 0;
 uint32_t the_fd;
 
-uint32_t max_num_labels = 1000000;
+uint32_t end_label = 1000000;
+uint32_t start_label = 0;
 
 uint64_t first_instr = 0;
-
-uint32_t taint_label_number_start = 0;
 
 float pdice(float m) {
     float x = ((float)(rand())) / RAND_MAX;
     return (x<m);
 }
-    
 
 std::map< std::pair<uint32_t, uint32_t>, char *> asidfd_to_filename;
 
-
-
 void label_byte(CPUState *env, target_ulong virt_addr, uint32_t label_num) {
-    //    printf ("label_num = %d\n", label_num);
-#if 0
-    if ( ! 
-         ((label_num >=8 && label_num <= 15) 
-          || (label_num >= 140 && label_num <= 160)) ) {
-        printf (" discarding\n");
-        return;
-    }
-    printf ("keeping\n");
-#endif
     target_phys_addr_t pa = panda_virt_to_phys(env, virt_addr);
     if (pandalog) {
         Panda__LogEntry ple = PANDA__LOG_ENTRY__INIT;
@@ -82,16 +68,10 @@ void label_byte(CPUState *env, target_ulong virt_addr, uint32_t label_num) {
     }
     if (!no_taint) {
         if (positional_labels) {
-            if (use_taint2) 
-                taint2_label_ram(pa, label_num);
-            else 
-                taint_label_ram(pa, label_num);
+            taint2_label_ram(pa, label_num);
         }
         else {
-            if (use_taint2) 
-                taint2_label_ram(pa, 1);
-            else 
-                taint_label_ram(pa, 1);
+            taint2_label_ram(pa, 1);
         }
     }
 }
@@ -181,36 +161,38 @@ void read_enter(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint3
 
 
 
-uint32_t bytes_labeled = 0;
+// This is our proxy for file position. Approximate because of fseek etc.
+uint32_t file_pos = 0;
 
 // 3 long sys_read(unsigned int fd, char __user *buf, size_t count);
 // typedef void (*on_sys_read_return_t)(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint32_t count);
 void read_return(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint32_t count) { 
     if (saw_read && panda_current_asid(env) == the_asid) {
         count = EAX;
-        printf ("count=%d\n", count);
+        // These are the start and end of the current range of labels.
+        uint32_t read_start = file_pos;
+        uint32_t read_end = file_pos + count;
         
-        printf ("returning from read of [%s] count=%d\n", taint_filename, count);    
-        printf ("*** applying %s taint labels %d..%d to buffer\n",
-                positional_labels ? "positional" : "uniform",
-                taint_label_number_start, taint_label_number_start + count - 1);
-        if (prob_label_u32 == 0 && bytes_labeled < max_num_labels) {
-            uint32_t start_bytes_labeled = bytes_labeled;
-            for (uint32_t i=0; i<count; i++) {
-                label_byte(env, last_read_buf+i, taint_label_number_start + i);
-                bytes_labeled ++;
-                if (bytes_labeled > max_num_labels) {
-                    printf ("reached max_num_labels bytes labeled\n");
-                    break;
-                }
+        printf ("returning from read of [%s] count=%u\n", taint_filename, count);    
+        // check if we overlap the range we want to label.
+        if (prob_label_u32 < 1e-9 && read_start < end_label &&
+                read_end > start_label) {
+            uint32_t range_start = std::max(read_start, start_label);
+            uint32_t range_end = std::min(read_end, end_label);
+            printf("*** applying %s taint labels %u..%u to buffer\n",
+                    positional_labels ? "positional" : "uniform",
+                    range_start, range_end - 1);
+
+            for (uint32_t i = range_start; i < range_end; i++) {
+                label_byte(env, last_read_buf + i,
+                        positional_labels ? i : 0);
             }
-            printf ("%d bytes labeled for this read\n", bytes_labeled - start_bytes_labeled);
-        }
-        else {
+            printf("%u bytes labeled for this read\n", range_end - range_start);
+        } else {
             // iterate over uint32 blobs
             for (uint32_t i=0; i<count/4; i++) {
                 if (pdice(prob_label_u32)) {
-                    uint32_t label_num = taint_label_number_start + i*4;
+                    uint32_t label_num = read_start + i*4;
                     printf ("labeling uint32 %d..%d\n", i*4, i*4+3);
                     // we will label this uint32
                     for (uint32_t j=0; j<4; j++) {
@@ -220,7 +202,7 @@ void read_return(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint
                 }
             }
         }
-        taint_label_number_start += count;
+        file_pos += count;
         //        printf (" ... done applying labels\n");
         saw_read = false;
     }
@@ -241,14 +223,7 @@ int file_taint_enable(CPUState *env, target_ulong pc) {
         if (ins > first_instr) {
             
             taint_is_enabled = true;
-            if (use_taint2) {
-                printf ("enabling taint2");
-                taint2_enable_taint();
-            }
-            else {
-                taint_enable_taint();
-                printf ("enabling taint");
-            }
+            taint2_enable_taint();
             printf (" @ ins  %" PRId64 "\n", ins); 
         }
     }
@@ -263,37 +238,29 @@ bool init_plugin(void *self) {
     args = panda_get_args("file_taint");
     taint_filename = panda_parse_string(args, "filename", "abc123");
     positional_labels = panda_parse_bool(args, "pos");
-    use_taint2 = !panda_parse_bool(args, "taint1");
     // used to just find the names of files that get 
     no_taint = panda_parse_bool(args, "notaint");
     prob_label_u32 = panda_parse_double(args, "prob_label_u32", 0.0);
-    max_num_labels = panda_parse_ulong(args, "max_num_labels", 1000000);
+    end_label = panda_parse_ulong(args, "max_num_labels", 1000000);
+    end_label = panda_parse_ulong(args, "end", end_label);
+    start_label = panda_parse_ulong(args, "start", 0);
     first_instr = panda_parse_uint64(args, "first_instr", 0);
 
     printf ("taint_filename = [%s]\n", taint_filename);
     printf ("positional_labels = %d\n", positional_labels);
-    printf ("use_taint2 = %d\n", use_taint2);
     printf ("no_taint = %d\n", no_taint);
     printf ("prob_label_u32 = %.3f\n", prob_label_u32);
-    printf ("max_num_labels = %d\n", max_num_labels);
+    printf ("end_label = %d\n", end_label);
     printf ("first_instr = %" PRId64 " \n", first_instr);
 
     panda_require("syscalls2");
 
     // this sets up the taint api fn ptrs so we have access
     if (!no_taint) {
-        if (use_taint2) {
-            panda_require("taint2");
-            assert(init_taint2_api());
-            if (first_instr == 0) {
-                taint2_enable_taint();
-            }
-        } else {
-            panda_require("taint");
-            assert(init_taint_api());
-            if (first_instr == 0) {
-                taint_enable_taint();
-            }
+        panda_require("taint2");
+        assert(init_taint2_api());
+        if (first_instr == 0) {
+            taint2_enable_taint();
         }
     }
     

@@ -170,10 +170,45 @@ LabelSetP tp_labelset_get(Shad *shad, Addr *a) {
     return NULL;
 }
 
+
+uint32_t tp_tcn_get(Shad *shad, Addr a) {
+    assert(shad != NULL);
+    switch (a.typ) {
+    case HADDR:
+        // TRL FIXME
+        return 0; // had_dir_find_64(shad->hd, a.val.ha+a.off);
+    case MADDR:
+        return shad->ram->query_tcn(a.val.ma+a.off);
+    case IADDR:
+        // TRL FIXME
+        return 0; // shad_dir_find_64(shad->io, a.val.ia+a.off);
+    case PADDR:
+        // TRL FIXME
+        return 0; //        return shad_dir_find_32(shad->ports, a.val.pa+a.off);        
+    case LADDR:
+        return shad->llv->query_tcn(a.val.la*MAXREGSIZE + a.off);
+    case GREG:
+        return shad->grv->query_tcn(a.val.gr * WORDSIZE + a.off);
+    case GSPEC:
+        // SpecAddr enum is offset by the number of guest registers                                                                                                                             
+        return shad->gsv->query_tcn(a.val.gs - NUMREGS + a.off);
+    case CONST:
+        return 0;
+    case RET:
+        return shad->ret->query_tcn(a.off);
+    default:
+        assert(false);
+    }
+    return 0;
+}
+
+
+
+
 // returns std::set of labels.
-LabelSetP tp_query(Shad *shad, Addr *a) {
+LabelSetP tp_query(Shad *shad, Addr a) {
     assert (shad != NULL);
-    LabelSetP ls = tp_labelset_get(shad, a);
+    LabelSetP ls = tp_labelset_get(shad, &a);
     return ls;
 }
 
@@ -181,20 +216,43 @@ LabelSetP tp_query(Shad *shad, Addr *a) {
 // returns rendered label set 
 LabelSetP tp_query_ram(Shad *shad, uint64_t pa) {
     Addr a = make_maddr(pa);
-    return tp_query(shad, &a);
+    return tp_query(shad, a);
 }
 
 // returns rendered label set 
 LabelSetP tp_query_reg(Shad *shad, int reg_num, int offset) {
     Addr a = make_greg(reg_num, offset);
-    return tp_query(shad, &a);
+    return tp_query(shad, a);
 }
 
 // returns rendered label set
 LabelSetP tp_query_llvm(Shad *shad, int reg_num, int offset) {
     Addr a = make_laddr(reg_num, offset);
-    return tp_query(shad, &a);
+    return tp_query(shad, a);
 }
+
+// returns taint compute # 
+uint32_t tp_query_tcn(Shad *shad, Addr a) {
+    assert (shad != NULL);
+    return tp_tcn_get(shad, a);
+}
+
+uint32_t tp_query_tcn_ram(Shad *shad, uint64_t pa) {
+    Addr a = make_maddr(pa);
+    return tp_query_tcn(shad, a);
+}
+
+uint32_t tp_query_tcn_reg(Shad *shad, int reg_num, int offset) {
+    Addr a = make_greg(reg_num, offset);
+    return tp_query_tcn(shad, a);
+}
+
+uint32_t tp_query_tcn_llvm(Shad *shad, int reg_num, int offset) {
+    Addr a = make_laddr(reg_num, offset);
+    return tp_query_tcn(shad, a);
+}
+
+
 
 uint32_t ls_card(LabelSetP ls) {
     return label_set_render_set(ls).size();
@@ -293,7 +351,7 @@ static void tp_labelset_put(Shad *shad, Addr *a, LabelSetP ls) {
 #endif
             break;
         case MADDR:
-            shad->ram->set(a->val.ma + a->off, ls);
+            shad->ram->label(a->val.ma + a->off, ls);
 #ifdef TAINTDEBUG
             taint_log("Labelset put in RAM: 0x%lx\n", (uint64_t)(a->val.ma + a->off));
             //labelset_spit(ls);
@@ -318,7 +376,7 @@ static void tp_labelset_put(Shad *shad, Addr *a, LabelSetP ls) {
             taint_log("Labelset put in LA: 0x%lx\n", (uint64_t)(a->val.la+a->off));
             //labelset_spit(ls);
 #endif
-            shad->llv->set(a->val.la*MAXREGSIZE + a->off, ls);
+            shad->llv->label(a->val.la*MAXREGSIZE + a->off, ls);
             break;
         case GREG:
 #ifdef TAINTDEBUG
@@ -326,7 +384,7 @@ static void tp_labelset_put(Shad *shad, Addr *a, LabelSetP ls) {
             //labelset_spit(ls);
 #endif
             // need to call labelset_copy to increment ref count
-            shad->grv->set(a->val.gr * WORDSIZE + a->off, ls);
+            shad->grv->label(a->val.gr * WORDSIZE + a->off, ls);
             break;
         case GSPEC:
 #ifdef TAINTDEBUG
@@ -334,14 +392,14 @@ static void tp_labelset_put(Shad *shad, Addr *a, LabelSetP ls) {
             //labelset_spit(ls);
 #endif
             // SpecAddr enum is offset by the number of guest registers
-            shad->gsv->set(a->val.gs - NUMREGS + a->off, ls);
+            shad->gsv->label(a->val.gs - NUMREGS + a->off, ls);
             break;
         case RET:
 #ifdef TAINTDEBUG
             taint_log("Labelset put in ret\n");
             //labelset_spit(ls);
 #endif
-            shad->ret->set(a->off, ls);
+            shad->ret->label(a->off, ls);
             break;
         default:
             assert (1==0);
@@ -372,10 +430,8 @@ std::set < uint32_t > labels_applied;
 // label -- associate label l with address a
 void tp_label(Shad *shad, Addr *a, uint32_t l) {
     assert (shad != NULL);
-    LabelSetP ls = tp_labelset_get(shad, a);
-    LabelSetP ls2 = label_set_singleton(l);
-    LabelSetP result = label_set_union(ls, ls2);
-    tp_labelset_put(shad, a, result);
+    LabelSetP ls = label_set_singleton(l);
+    tp_labelset_put(shad, a, ls);
     labels_applied.insert(l);
 }
 

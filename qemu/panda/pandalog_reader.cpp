@@ -1,6 +1,7 @@
 
 // cd panda/qemu
-// g++ -g -o pandalog_reader pandalog_reader.c pandalog.c pandalog.pb-c.c  -L/usr/local/lib -lprotobuf-c -I .. -lz -D PANDALOG_READER
+// g++ -g -o pandalog_reader pandalog_reader.cpp pandalog.c pandalog.pb-c.c ../../../lava/src_clang/lavaDB.cpp  -L/usr/local/lib -lprotobuf-c -I .. -lz -D PANDALOG_READER  -std=c++11 
+
 
 #define __STDC_FORMAT_MACROS
 
@@ -9,6 +10,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "pandalog.h"
+#include <map>
+#include <string>
+
+#include "../../../lava/src_clang/lavaDB.h"
 
 
 void print_process(Panda__Process *p) {
@@ -38,9 +43,19 @@ void print_process_key_index(Panda__ProcessKeyIndex *pki) {
     printf (" index = [%u] ", pki->index);            
 }
 
+std::map<std::string,uint32_t> str2ind;
+std::map<uint32_t,std::string> ind2str;
 
+
+char *gstr(uint32_t ind) {
+    return (char *) (ind2str[ind].c_str());
+}
 
 int main (int argc, char **argv) {
+    
+    str2ind = LoadDB(std::string("/tmp/lavadb"));
+    ind2str = InvertDB(str2ind);
+    
     pandalog_open(argv[1], "r");
     Panda__LogEntry *ple;
     while (1) {
@@ -52,12 +67,12 @@ int main (int argc, char **argv) {
             printf ("[after replay end] : ");
         } 
         else {
-            printf ("instr=%llu pc=0x%x : ", ple->instr, ple->pc);
+            printf ("instr=%" PRIu64 " pc=0x%" PRIx64 " :", ple->instr, ple->pc);
         }
 
         // from asidstory / osi
         if (ple->has_asid) {
-            printf (" asid=%x", ple->asid);
+            printf (" asid=%" PRIx64, ple->asid);
         }
 
         if (ple->has_process_id != 0) {
@@ -72,34 +87,45 @@ int main (int argc, char **argv) {
             printf (" tl=%d", ple->taint_label_number);
         }
         if (ple->has_taint_label_virtual_addr) {
-            printf (" va=0x%llx", ple->taint_label_virtual_addr);
+            printf (" va=0x%" PRIx64, ple->taint_label_virtual_addr);
         }
         if (ple->has_taint_label_physical_addr) {
-            printf (" pa=0x%llx", ple->taint_label_physical_addr);
+            printf (" pa=0x%" PRIx64 , ple->taint_label_physical_addr);
         }
 
-        // from tainted_branch
-        if (ple->n_tainted_branch_label > 0) {
-            printf (" tb=(%d,[", ple->n_tainted_branch_label);
-            uint32_t i;
-            for (i=0; i<ple->n_tainted_branch_label; i++) {
-                printf (" %d", ple->tainted_branch_label[i]);
-                if (i+1 < ple->n_tainted_branch_label) {
-                    printf (",");
-                }
-            }
-            printf ("])");
-        }
         if (ple->n_callstack > 0) {
-            printf (" cs=(%d,[",ple->n_callstack);
+            printf (" callstack=(%u,[", (uint32_t) ple->n_callstack);
             uint32_t i;
             for (i=0; i<ple->n_callstack; i++) {
-                printf (" 0x%llx", ple->callstack[i]);
+                printf (" 0x%" PRIx64 , ple->callstack[i]);
                 if (i+1 < ple->n_callstack) {
                     printf (",");
                 }
             }
             printf ("])");
+        }
+
+        if (ple->attack_point) {
+            Panda__AttackPoint *ap = ple->attack_point;
+            printf (" attack point: info=[%u][%s]", ap->info, gstr(ap->info));
+        }
+
+        if (ple->src_info) {
+            Panda__SrcInfo *si = ple->src_info;
+            printf (" src info filename=[%u][%s] astnode=[%u][%s] linenum=%d",
+                    si->filename, gstr(si->filename), si->astnodename, 
+                    gstr(si->astnodename), si->linenum);
+        }
+
+        if (ple->has_tainted_branch && ple->tainted_branch) {
+            printf (" tainted branch");
+        }
+        if (ple->taint_query_hypercall) {
+            Panda__TaintQueryHypercall *tqh = ple->taint_query_hypercall;
+            printf (" taint query hypercall(buf=0x%" PRIx64 ",len=%u,num_tainted=%u)", tqh->buf, tqh->len, tqh->num_tainted);
+        }
+        if (ple->has_tainted_instr && ple->tainted_instr) {
+            printf (" tainted instr");
         }
 
         // dead data
@@ -111,10 +137,9 @@ int main (int argc, char **argv) {
             }
         }
 
-
         // taint queries
         if (ple->taint_query_unique_label_set) {
-            printf (" taint query unqiue label set: ptr=%llu labels: ", ple->taint_query_unique_label_set->ptr);
+            printf (" taint query unqiue label set: ptr=%" PRIx64" labels: ", ple->taint_query_unique_label_set->ptr);
             uint32_t i;
             for (i=0; i<ple->taint_query_unique_label_set->n_label; i++) {
                 printf ("%d ", ple->taint_query_unique_label_set->label[i]);
@@ -122,7 +147,8 @@ int main (int argc, char **argv) {
         }
         
         if (ple->taint_query) {
-            printf (" taint query: asid=0x%x: labels ptr %llu", ple->taint_query->asid, ple->taint_query->ptr);
+            Panda__TaintQuery *tq = ple->taint_query;
+            printf (" taint query: labels ptr %" PRIx64" tcn=%d off=%d", tq->ptr, (int) tq->tcn, (int) tq->offset);
         }
 
         // win7proc
