@@ -4080,8 +4080,11 @@ int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
 
 int panda_virtual_memory_rw(CPUState *env, target_ulong addr,
                         uint8_t *buf, int len, int is_write) {
-    // XXX Unimplemented for linux user mode
-    return -1;
+    if(is_write){
+        return copy_to_user(addr, buf, len);
+    } else {
+        return copy_from_user(buf, addr, len);
+    }
 }
 
 #else
