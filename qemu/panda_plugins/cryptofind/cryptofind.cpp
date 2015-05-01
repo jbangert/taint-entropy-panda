@@ -10,6 +10,10 @@
 // This needs to be defined before anything is included in order to get
 // the PRIx64 macro
 #define __STDC_FORMAT_MACROS
+#ifdef CONFIG_SOFTMMU
+#define RAM_SIZE 512*1024*1024
+#define FIXED_SIZE_RAM
+#endif
 
 extern "C" {
 #include "panda_plugin.h"
@@ -22,7 +26,6 @@ extern "C" {
 
 #include "iclass.h"
 
-#define RAM_SIZE 512*1024*1024
 //#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +50,11 @@ void uninit_plugin(void *);
 }
 //XXX: Do this on a per-address space basis
 //std::unordered_map<target_ulong , blockinfo> block_infos;
+#ifdef FIXED_SIZE_RAM
 std::vector<blockinfo> block_infos;
+#else
+std::unordered_map<target_ulong, blockinfo> block_infos;
+#endif
 std::unordered_map<target_ulong, uint8_t> read_set;
 std::unordered_map<target_ulong, uint8_t> write_set;
 blockinfo cumulative;
@@ -65,14 +72,17 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   #else
   target_ulong physaddr = tb->pc;
   #endif
+  #ifdef FIXED_SIZE_RAM
   if(physaddr >= RAM_SIZE){
     fprintf(stderr,"physaddr outside of ram %lX\n", physaddr);
     return 0;
   }
+  #endif
   unsigned char *buf = (unsigned char *) malloc(tb->size);
   int err = panda_virtual_memory_rw(env, tb->pc, buf, tb->size, 0);
   if(err == -1){
-    fprintf(stderr, "Error reading block %lX\n", (unsigned long)tb->pc);
+    fprintf(stderr, "Error reading block %lX\n ", (unsigned long)tb->pc);
+    return 0;
   }
   bool use64 = (env->hflags & HF_LMA_MASK) != 0;
   blockinfo blk = get_block_stats(buf, tb->pc, tb->size, use64);
@@ -118,9 +128,11 @@ int before_block_exec(CPUState *env, TranslationBlock *tb){
   #else
   target_ulong physaddr = tb->pc;
   #endif
+  #ifdef FIXED_SIZE_RAM
   if(physaddr >= RAM_SIZE){
     return 0;
   }
+  #endif
   blockinfo &blk = block_infos[physaddr];
   if(!tracing){
     if(heuristic(blk)){
@@ -159,8 +171,11 @@ int before_block_exec(CPUState *env, TranslationBlock *tb){
 extern void init_icls();
 bool init_plugin(void *self) {
   #ifdef TARGET_I386
+  #ifdef FIXED_SIZE_RAM
   block_infos.resize(RAM_SIZE);
-  fprintf(stderr,"Initializing ram_size, %lX with %u per element\n",RAM_SIZE,sizeof(struct blockinfo));
+    fprintf(stderr,"Initializing ram_size, %lX with %u per element\n",RAM_SIZE,sizeof(struct blockinfo));
+  #endif
+
     printf ("Initializing cryptofind\n");
     plugin_self = self;
     init_icls();
