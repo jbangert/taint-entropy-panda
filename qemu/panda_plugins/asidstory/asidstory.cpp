@@ -55,7 +55,7 @@ bool init_plugin(void *);
 void uninit_plugin(void *);
 
 }
-
+#ifndef CONFIG_USER_ONLY
 uint32_t num_cells = 80;
 uint64_t min_instr;
 uint64_t max_instr = 0;
@@ -297,3 +297,4 @@ void uninit_plugin(void *self) {
   spit_asidstory();
 }
 
+#endif

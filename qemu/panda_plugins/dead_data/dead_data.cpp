@@ -39,7 +39,7 @@ extern "C" {
 #include "guestarch.h"
 }
 
-
+#ifndef CONFIG_USER_ONLY
 #include "../common/prog_point.h"
 
 #include "../taint2/taint2.h"
@@ -203,3 +203,4 @@ bool init_plugin(void *self) {
 void uninit_plugin(void *self) {
     dd_spit();
 }
+#endif

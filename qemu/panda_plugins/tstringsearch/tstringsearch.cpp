@@ -169,6 +169,7 @@ bool labeled = false;
 #endif
 
 bool init_plugin(void *self) {
+#ifdef CONFIG_SOFTMMU
     printf ("Initializing tstringsearch\n");
 
     plugin_self = self;
@@ -176,7 +177,6 @@ bool init_plugin(void *self) {
     panda_require("stringsearch");
     panda_require("taint2");
 
-#ifdef CONFIG_SOFTMMU
 
     panda_arg_list *args;
     args = panda_get_args("tstringsearch");

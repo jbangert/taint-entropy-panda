@@ -86,7 +86,7 @@ uint32_t taint2_num_labels_applied(void);
 void taint2_track_taint_state(void);
 
 }
-
+#ifndef CONFIG_USER_ONLY
 #include <llvm/PassManager.h>
 #include <llvm/PassRegistry.h>
 #include <llvm/Analysis/Verifier.h>
@@ -893,3 +893,4 @@ void uninit_plugin(void *self) {
     panda_enable_tb_chaining();
 
 }
+#endif

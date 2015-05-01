@@ -60,8 +60,11 @@ static inline bool heuristic(blockinfo &blk){
   return blk.total_instr >= 16 && blk.arith_instr >= blk.total_instr/2;
 }
 int after_block_translate(CPUState *env, TranslationBlock *tb){
-  
+  #ifdef CONFIG_SOFTMMU
   target_phys_addr_t physaddr = panda_virt_to_phys(env,tb->pc);
+  #else
+  target_ulong physaddr = tb->pc;
+  #endif
   if(physaddr >= RAM_SIZE){
     fprintf(stderr,"physaddr outside of ram %lX\n", physaddr);
     return 0;
@@ -110,7 +113,11 @@ int vmem_write(CPUState *env, target_ulong pc, target_ulong addr, target_ulong s
   return 0;
 }
 int before_block_exec(CPUState *env, TranslationBlock *tb){
+  #ifdef CONFIG_SOFTMMU
   target_phys_addr_t physaddr = panda_virt_to_phys(env,tb->pc);
+  #else
+  target_ulong physaddr = tb->pc;
+  #endif
   if(physaddr >= RAM_SIZE){
     return 0;
   }
@@ -122,13 +129,22 @@ int before_block_exec(CPUState *env, TranslationBlock *tb){
       panda_enable_memcb();
       read_set.clear();
       write_set.clear();
+      #ifdef CONFIG_SOFTMMU
       memtrace(CRYPTO_BEGIN,rr_get_guest_instr_count(),0);
+      #else
+      memtrace(CRYPTO_BEGIN,tb->pc,0);
+      #endif
+      
     }
   } else {
     if(!heuristic(cumulative)){
       //The last block we executed was the last crypto block
       dump_memsets();
+      #ifdef CONFIG_SOFTMMU
       memtrace(CRYPTO_END,rr_get_guest_instr_count(),0);
+      #else
+      memtrace(CRYPTO_END,tb->pc,0);
+      #endif
       tracing = false;
       panda_disable_memcb();
     } else {

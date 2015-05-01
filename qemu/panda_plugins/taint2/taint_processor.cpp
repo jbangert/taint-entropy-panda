@@ -29,7 +29,7 @@ PANDAENDCOMMENT */
 #include "network.h"
 #include "defines.h"
 #include "fast_shad.h"
-
+#ifndef CONFIG_USER_ONLY
 Addr make_haddr(uint64_t a) {
   Addr ha;
   ha.typ = HADDR;
@@ -519,3 +519,4 @@ void fprintf_addr(Shad *shad, Addr *a, FILE *fp) {
 void print_addr(Shad *shad, Addr *a) {
   fprintf_addr(shad, a, stdout);
 }
+#endif

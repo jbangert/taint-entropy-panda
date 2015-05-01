@@ -25,7 +25,7 @@ int virt_mem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulon
 int before_block_exec(CPUState *env, TranslationBlock *tb);
 
 }
-
+#ifndef CONFIG_USER_ONLY
 #include <map>
 #include <stack>
 #include <set>
@@ -530,3 +530,4 @@ bool init_plugin(void *self) {
 }
 
 void uninit_plugin(void *self) { }
+#endif

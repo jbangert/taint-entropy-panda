@@ -11,13 +11,14 @@
 #include "targphys.h"
 #include "rr_log_all.h"
 
+
+#ifndef CONFIG_USER_ONLY
+
 // accessors
 uint64_t rr_get_pc(void);
 uint64_t rr_get_secondary(void);
 uint64_t rr_get_guest_instr_count (void);
 double rr_get_percentage(void);
-
-
 void rr_clear_rr_guest_instr_count(CPUState *cpu_state);
 
 //mz structure for arguments to cpu_physical_memory_rw()
@@ -130,5 +131,5 @@ uint64_t replay_get_guest_instr_count(void);
 uint64_t replay_get_total_num_instructions(void);
 
 void panda_end_replay(void);
-
+#endif
 #endif

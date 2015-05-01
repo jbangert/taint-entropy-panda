@@ -22,7 +22,7 @@ PANDAENDCOMMENT */
 #include "panda_plugin.h"
 
 #include <stdio.h>
-
+#ifndef CONFIG_USER_ONLY
 extern RR_log *rr_nondet_log;
 
 static double percent = 0.0;
@@ -56,3 +56,4 @@ bool init_plugin(void *self) {
 void uninit_plugin(void *self) {
 
 }
+#endif

@@ -88,7 +88,6 @@ int tbranch_after_block_exec(CPUState *env, TranslationBlock *tb, TranslationBlo
     return 0;
 }
 
-#endif
 
 bool init_plugin(void *self) {
     panda_require("callstack_instr");
@@ -103,3 +102,4 @@ bool init_plugin(void *self) {
 
 void uninit_plugin(void *self) {
 }
+#endif

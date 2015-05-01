@@ -1,10 +1,10 @@
-
+#include "config.h"
 #ifndef PANDALOG_READER
 #include "panda_common.h"
 #include "rr_log.h"
 #endif
 
-
+#ifndef CONFIG_USER_ONLY
 #include "pandalog.pb-c.h"
 #include "pandalog.h"
 #include <zlib.h>
@@ -92,3 +92,4 @@ void pandalog_free_entry(Panda__LogEntry *entry) {
 
 
 
+#endif

@@ -56,6 +56,8 @@ bool init_plugin(void *);
 void uninit_plugin(void *);
 
 }
+
+#ifdef CONFIG_SOFTMMU
 enum taint_source{
   taint_FreeBSD
 };
@@ -64,7 +66,6 @@ void *plugin_self;
 char function[8192];
 size_t function_size=0;
 std::set<target_phys_addr_t> interesting_funcs;
-#ifdef CONFIG_SOFTMMU
 //Every time we jump to a function and it has changed, it will be retranslated, so it suffices to check
 // on every retranslation
 int tentropy_enable_taint(){
@@ -81,37 +82,7 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   uint8_t *buf = (uint8_t *)malloc(function_size);
   assert(buf);
   panda_virtual_memory_rw(env,tb->pc,buf,function_size,0);
-  
-  if(!memcmp(function,buf,function_size))
-    interesting_funcs.insert(physaddr);
-  else
-    interesting_funcs.erase(physaddr);
-  free(buf);
-  return 0;
-}
-void tentropy_oncall(CPUState *env, target_ulong func){
-  target_phys_addr_t physaddr = panda_virt_to_phys(env,func);
-  if(interesting_funcs.count(physaddr)>0){
-    printf("Function %llX with taint called \n", (long long unsigned)func);
-    if(taint_source == taint_FreeBSD){
-      tentropy_enable_taint();
-      #ifdef TARGET_X86_64
-      uint64_t va_begin = env->regs[R_EDI];
-      uint64_t pa_begin = panda_virt_to_phys(env,va_begin);
-      uint64_t size = env->regs[R_ESI];
-      assert(size<32);
-      for(;size;size--){
-        printf("Tainting %" PRIu64 "\n",pa_begin+size);
-        taint2_label_ram(pa_begin+size , 10); //TODO: generate unique label
-      }
-      #endif
-    }
-  }
-}
-void tentropy_onret(CPUState *env, target_ulong func){
-  //  printf("Function %llX returned\n", (long long unsigned)func);
-}
-#endif
+
 bool init_plugin(void *self) {
   
     printf ("Initializing tentropy\n");
@@ -151,3 +122,34 @@ bool init_plugin(void *self) {
 
 void uninit_plugin(void *self) {
 }
+  
+  if(!memcmp(function,buf,function_size))
+    interesting_funcs.insert(physaddr);
+  else
+    interesting_funcs.erase(physaddr);
+  free(buf);
+  return 0;
+}
+void tentropy_oncall(CPUState *env, target_ulong func){
+  target_phys_addr_t physaddr = panda_virt_to_phys(env,func);
+  if(interesting_funcs.count(physaddr)>0){
+    printf("Function %llX with taint called \n", (long long unsigned)func);
+    if(taint_source == taint_FreeBSD){
+      tentropy_enable_taint();
+      #ifdef TARGET_X86_64
+      uint64_t va_begin = env->regs[R_EDI];
+      uint64_t pa_begin = panda_virt_to_phys(env,va_begin);
+      uint64_t size = env->regs[R_ESI];
+      assert(size<32);
+      for(;size;size--){
+        printf("Tainting %" PRIu64 "\n",pa_begin+size);
+        taint2_label_ram(pa_begin+size , 10); //TODO: generate unique label
+      }
+      #endif
+    }
+  }
+}
+void tentropy_onret(CPUState *env, target_ulong func){
+  //  printf("Function %llX returned\n", (long long unsigned)func);
+}
+#endif

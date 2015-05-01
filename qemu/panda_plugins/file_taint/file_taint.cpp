@@ -23,7 +23,7 @@ extern "C" {
     void set_loglevel(int new_loglevel);
 
 }
-
+#ifndef CONFIG_USER_ONLY
 #include <vector>
 #include <map>
  
@@ -289,3 +289,4 @@ bool init_plugin(void *self) {
 void uninit_plugin(void *self) {
 }
 
+#endif

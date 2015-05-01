@@ -49,7 +49,7 @@ int mem_write_callback(CPUState *env, target_ulong pc, target_ulong addr, target
 int mem_read_callback(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf);
 
 }
-
+#ifndef CONFIG_USER_ONLY
 struct bufdesc { target_ulong buf; target_ulong size; target_ulong cr3; };
 
 std::list<bufdesc> bufs;
@@ -140,3 +140,4 @@ void uninit_plugin(void *self) {
 
     fclose(mem_report);
 }
+#endif

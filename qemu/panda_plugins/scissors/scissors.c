@@ -18,6 +18,7 @@
 
 bool init_plugin(void *);
 void uninit_plugin(void *);
+#ifndef CONFIG_USER_ONLY
 int before_block_exec(CPUState *env, TranslationBlock *tb);
 
 extern RR_log *rr_nondet_log;
@@ -412,3 +413,4 @@ bool init_plugin(void *self) {
 void uninit_plugin(void *self) {
     if (snipping && !done) end_snip();
 }
+#endif
