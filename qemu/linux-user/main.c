@@ -3125,6 +3125,7 @@ static void handle_generate_llvm(const char *arg)
 static void handle_panda_plugin(const char *arg)
 {
         if(!panda_load_plugin(arg))
+          if(!panda_load_plugin(panda_plugin_path(arg)))
             fprintf(stderr, "WARN: Unable to load plugin `%s'\n", optarg);
 }
 
