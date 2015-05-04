@@ -41,7 +41,7 @@ extern "C" {
 #include "../common/prog_point.h"
 #include "../callstack_instr/callstack_instr_ext.h"
 #include "panda_plugin_plugin.h"
-
+#ifdef CONFIG_SOFTMMU
 // These need to be extern "C" so that the ABI is compatible with
 // QEMU/PANDA, which is written in C
 extern "C" {
@@ -248,3 +248,4 @@ void uninit_plugin(void *self) {
     }
     fclose(mem_report);
 }
+#endif

@@ -95,7 +95,7 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
 static void memtrace(int t, target_ulong addr, char buf){
   if(!tracing)
     return;
-  trace_message m;
+  trace_message m ={};
   m.type= t;
   m.addr = addr;
   m.data = buf;
@@ -119,7 +119,7 @@ int vmem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulong si
 int vmem_write(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
   if(!tracing) return 0;
   for(target_ulong i=0;i<size;i++)
-    write_set[addr+i] = *((uint8_t *)buf + i);
+  write_set[addr+i] = *((uint8_t *)buf + i); 
   return 0;
 }
 int before_block_exec(CPUState *env, TranslationBlock *tb){
