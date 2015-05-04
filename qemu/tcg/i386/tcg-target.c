@@ -1182,25 +1182,58 @@ static void tcg_out_qemu_ld_direct(TCGContext *s, int datalo, int datahi,
 
 #include "panda_plugin.h"
 
-static void REGPARM panda_user_write(target_ulong addr){
-    panda_cb_list *plist;
-    uint64_t val = *(uint64_t*)g2h(addr);
-    for(plist = panda_cbs[PANDA_CB_VIRT_MEM_WRITE]; plist != NULL;
-            plist = panda_cb_list_next(plist)) {
-        plist->entry.virt_mem_write(NULL, 0, addr,
-            sizeof val, &val);
-    } 
+#define CB(size)                                                        \ 
+static void REGPARM panda_user_write_ ## size(target_ulong addr){       \
+    panda_cb_list *plist;                                               \
+    uint64_t val = *(uint##size##_t*)g2h(addr);                         \
+    for(plist = panda_cbs[PANDA_CB_VIRT_MEM_WRITE]; plist != NULL;      \
+        plist = panda_cb_list_next(plist)) {                            \
+        plist->entry.virt_mem_write(NULL, 0, addr,                      \
+                                    size/8, &val);                      \
+    }                                                                   \
+}                                                                       \
+static void REGPARM panda_user_read_ ## size(target_ulong addr){        \
+    uint64_t val = *(uint##size##_t*)g2h(addr);                         \
+    panda_cb_list *plist;                                               \
+    for(plist = panda_cbs[PANDA_CB_VIRT_MEM_READ]; plist != NULL;       \
+        plist = panda_cb_list_next(plist)) {                            \
+        plist->entry.virt_mem_read(NULL, 0, addr,                       \
+                                   sizeof val, &val);                   \
+    }                                                                   \
 }
-static void REGPARM panda_user_read(target_ulong addr){
-    uint64_t val = *(uint64_t*)g2h(addr);
-    panda_cb_list *plist;
-    for(plist = panda_cbs[PANDA_CB_VIRT_MEM_READ]; plist != NULL;
-            plist = panda_cb_list_next(plist)) {
-        plist->entry.virt_mem_read(NULL, 0, addr,
-                                   sizeof val, &val);
-    } 
+
+static void pandauser_savereg(TCGContext *s){
+    tcg_out_push(s,TCG_REG_RBP);
+    tcg_out_push(s,TCG_REG_RDI);
+    tcg_out_push(s,TCG_REG_RSI);
+    tcg_out_push(s,TCG_REG_RDX);
+    tcg_out_push(s,TCG_REG_RCX);
+    tcg_out_push(s,TCG_REG_RBX);
+    tcg_out_push(s,TCG_REG_RAX);
+    tcg_out_push(s,TCG_REG_R8);
+    tcg_out_push(s,TCG_REG_R9);
+    tcg_out_push(s,TCG_REG_R10);
+    tcg_out_push(s,TCG_REG_R11);    
 }
+static void pandauser_restorereg(TCGContext *s){
+    tcg_out_pop(s,TCG_REG_R11);    
+    tcg_out_pop(s,TCG_REG_R10);
+    tcg_out_pop(s,TCG_REG_R9);
+    tcg_out_pop(s,TCG_REG_R8);
+    tcg_out_pop(s,TCG_REG_RAX);
+    tcg_out_pop(s,TCG_REG_RBX);
+    tcg_out_pop(s,TCG_REG_RCX);
+    tcg_out_pop(s,TCG_REG_RDX);
+    tcg_out_pop(s,TCG_REG_RSI);
+    tcg_out_pop(s,TCG_REG_RDI);
+    tcg_out_pop(s,TCG_REG_RBP);
+}
+
 #endif
+CB(8)
+CB(16)
+CB(32)
+CB(64)
 /* XXX: qemu_ld and qemu_st could be modified to clobber only EDX and
    EAX. It will be useful once fixed registers globals are less
    common. */
@@ -1320,7 +1353,18 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
         if(panda_use_memcb){
             // XXX: cranky hack, might not work for all sizes
             tcg_out_mov(s, TCG_TYPE_I64,TCG_REG_RDI, base);
-            tcg_out_calli(s,(tcg_target_long)panda_user_read); 
+            pandauser_savereg(s);
+            switch(opc){
+            case 0:
+                tcg_out_calli(s,(tcg_target_long)panda_user_read_8);  break;
+            case 1:
+                tcg_out_calli(s,(tcg_target_long)panda_user_read_16);  break;
+            case 2:
+                tcg_out_calli(s,(tcg_target_long)panda_user_read_32);  break;
+            case 3:
+                tcg_out_calli(s,(tcg_target_long)panda_user_read_64);  break;
+            }
+            pandauser_restorereg(s);
         }
         tcg_out_qemu_ld_direct(s, data_reg, data_reg2, base, offset, opc);
 
@@ -1506,7 +1550,20 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
         if(panda_use_memcb){
             // XXX: cranky hack, might not work for all sizes
             tcg_out_mov(s, TCG_TYPE_I64,TCG_REG_RDI, base);
-            tcg_out_calli(s,(tcg_target_long)panda_user_write);
+            
+            pandauser_savereg(s);
+            switch(opc){
+            case 0:
+                tcg_out_calli(s,(tcg_target_long)panda_user_write_8);  break;
+            case 1:
+                tcg_out_calli(s,(tcg_target_long)panda_user_write_16);  break;
+            case 2:
+                tcg_out_calli(s,(tcg_target_long)panda_user_write_32);  break;
+            case 3:
+                tcg_out_calli(s,(tcg_target_long)panda_user_write_64);  break;
+            }
+            
+            pandauser_restorereg(s);
         }
     }
 #endif
