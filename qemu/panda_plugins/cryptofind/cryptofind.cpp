@@ -122,7 +122,8 @@ int vmem_write(CPUState *env, target_ulong pc, target_ulong addr, target_ulong s
   write_set[addr+i] = *((uint8_t *)buf + i); 
   return 0;
 }
-int before_block_exec(CPUState *env, TranslationBlock *tb){
+bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
+  bool invalidate =false;
   #ifdef CONFIG_SOFTMMU
   target_phys_addr_t physaddr = panda_virt_to_phys(env,tb->pc);
   #else
@@ -138,7 +139,11 @@ int before_block_exec(CPUState *env, TranslationBlock *tb){
     if(heuristic(blk)){
       cumulative = blk;
       tracing = true;
+#ifdef CONFIG_SOFTMMU
       panda_enable_memcb();
+      panda_do_flush_tb();
+      invalidate = true;
+#endif
       read_set.clear();
       write_set.clear();
       #ifdef CONFIG_SOFTMMU
@@ -154,17 +159,18 @@ int before_block_exec(CPUState *env, TranslationBlock *tb){
       dump_memsets();
       #ifdef CONFIG_SOFTMMU
       memtrace(CRYPTO_END,rr_get_guest_instr_count(),0);
+      panda_disable_memcb();
       #else
       memtrace(CRYPTO_END,tb->pc,0);
       #endif
+      fflush(f_memtrace);
       tracing = false;
-      panda_disable_memcb();
     } else {
       cumulative.total_instr  +=  blk.total_instr;
       cumulative.arith_instr  +=  blk.arith_instr;
     }
   }
-  return 0;
+  return invalidate;
 }
 
  #endif
@@ -182,8 +188,8 @@ bool init_plugin(void *self) {
     panda_cb pcb;
     pcb.after_block_translate  = after_block_translate;
     panda_register_callback(self, PANDA_CB_AFTER_BLOCK_TRANSLATE, pcb);
-    pcb.before_block_exec  = before_block_exec;
-    panda_register_callback(self, PANDA_CB_BEFORE_BLOCK_EXEC, pcb);
+    pcb.before_block_exec_invalidate_opt  = before_block_exec_invalidate;
+    panda_register_callback(self, PANDA_CB_BEFORE_BLOCK_EXEC_INVALIDATE_OPT, pcb);
     pcb.virt_mem_write = vmem_write;
     panda_register_callback(self, PANDA_CB_VIRT_MEM_WRITE, pcb);
     pcb.virt_mem_read = vmem_read;
@@ -195,6 +201,10 @@ bool init_plugin(void *self) {
     // PPP_REG_CB("callstack_instr", on_call, tentropy_oncall);
     //PPP_REG_CB("callstack_instr", on_ret, tentropy_onret);
     #endif
+    //TODO: see if this kills performance too much
+    panda_enable_memcb();
+    panda_disable_tb_chaining();
+
     f_memtrace = fopen("memtrace","wb");
     cumulative = {0,0};
     tracing = false;

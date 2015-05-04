@@ -1182,30 +1182,24 @@ static void tcg_out_qemu_ld_direct(TCGContext *s, int datalo, int datahi,
 
 #include "panda_plugin.h"
 
-static void REGPARM pandauser_write(target_ulong addr, uint64_t val, int size){
+static void REGPARM panda_user_write(target_ulong addr){
     panda_cb_list *plist;
+    uint64_t val = *(uint64_t*)g2h(addr);
     for(plist = panda_cbs[PANDA_CB_VIRT_MEM_WRITE]; plist != NULL;
             plist = panda_cb_list_next(plist)) {
         plist->entry.virt_mem_write(NULL, 0, addr,
-            size, &val);
+            sizeof val, &val);
     } 
 }
-static void REGPARM pandauser_read(target_ulong addr, uint64_t val, int size){
+static void REGPARM panda_user_read(target_ulong addr){
+    uint64_t val = *(uint64_t*)g2h(addr);
     panda_cb_list *plist;
     for(plist = panda_cbs[PANDA_CB_VIRT_MEM_READ]; plist != NULL;
             plist = panda_cb_list_next(plist)) {
         plist->entry.virt_mem_read(NULL, 0, addr,
-            size, &val);
+                                   sizeof val, &val);
     } 
 }
-#define DEFCB(size) \
-    static void REGPARM panda_user_read_## size (target_ulong addr, uint64_t val){ pandauser_read(addr, val, size/8); } \
-    static void REGPARM panda_user_write_## size (target_ulong addr, uint64_t val){ pandauser_write(addr, val, size/8); } 
-
-DEFCB(64)
-DEFCB(32)
-DEFCB(16)
-DEFCB(8)
 #endif
 /* XXX: qemu_ld and qemu_st could be modified to clobber only EDX and
    EAX. It will be useful once fixed registers globals are less
@@ -1323,25 +1317,14 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
                 base = TCG_REG_RDI, offset = 0;
             }
         }
-
-        tcg_out_qemu_ld_direct(s, data_reg, data_reg2, base, offset, opc);
-        
         if(panda_use_memcb){
             // XXX: cranky hack, might not work for all sizes
             tcg_out_mov(s, TCG_TYPE_I64,TCG_REG_RDI, base);
-            tcg_out_mov(s, (opc == 3 ? TCG_TYPE_I64 : TCG_TYPE_I32),
-                        TCG_REG_RSI, data_reg);
-            switch(opc){
-            case 0:
-                tcg_out_calli(s,(tcg_target_long)panda_user_read_8); break;
-            case 1:
-                tcg_out_calli(s,(tcg_target_long)panda_user_read_16); break;
-            case 2:
-                tcg_out_calli(s,(tcg_target_long)panda_user_read_32); break;
-            case 3:
-                tcg_out_calli(s,(tcg_target_long)panda_user_read_64); break;
-            }
+            tcg_out_calli(s,(tcg_target_long)panda_user_read); 
         }
+        tcg_out_qemu_ld_direct(s, data_reg, data_reg2, base, offset, opc);
+
+        
     }
 #endif
 }
@@ -1505,22 +1488,6 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
     {
         int32_t offset = GUEST_BASE;
         int base = args[addrlo_idx];
-        if(panda_use_memcb){
-            // XXX: cranky hack, might not work for all sizes
-            tcg_out_mov(s, TCG_TYPE_I64,TCG_REG_RDI, base);
-            tcg_out_mov(s, (opc == 3 ? TCG_TYPE_I64 : TCG_TYPE_I32),
-                        TCG_REG_RSI, data_reg);
-            switch(opc){
-            case 0:
-                tcg_out_calli(s,(tcg_target_long)&panda_user_write_8); break;
-            case 1:
-                tcg_out_calli(s,(tcg_target_long)&panda_user_write_16); break;
-            case 2:
-                tcg_out_calli(s,(tcg_target_long)&panda_user_write_32); break;
-            case 3:
-                tcg_out_calli(s,(tcg_target_long)&panda_user_write_64); break;
-            }
-        }
         if (TCG_TARGET_REG_BITS == 64) {
             /* ??? We assume all operations have left us with register
                contents that are zero extended.  So far this appears to
@@ -1536,6 +1503,11 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
         }
 
         tcg_out_qemu_st_direct(s, data_reg, data_reg2, base, offset, opc);
+        if(panda_use_memcb){
+            // XXX: cranky hack, might not work for all sizes
+            tcg_out_mov(s, TCG_TYPE_I64,TCG_REG_RDI, base);
+            tcg_out_calli(s,(tcg_target_long)panda_user_write);
+        }
     }
 #endif
 }
