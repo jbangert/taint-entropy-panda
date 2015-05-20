@@ -96,19 +96,47 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   }
   return 0;
 }
+void vectorize_set(std::map<uint64_t, uint8_t> &m, std::map<uint64_t, std::vector<uint8_t> > &out){
+  uint64_t lastaddr = -1;
+  int size=-1;
+  std::vector<uint8_t> * v;
+  for (auto &c: m){
+    if(lastaddr +1!= c.first || size  == -1){
+      
+      size = 0;
+      v = &out[c.first];
+    }
+    v->push_back(c.second);
+    lastaddr = c.first;
+    size++;
+  }
+}
 template <typename functor, typename collection> void trace_memset(const collection &set, const functor &f){
-  std::map<target_ulong, uint8_t> ordered;
-  /* for(auto &celem : collection){
+  std::map<uint64_t, uint8_t> ordered;
+  for(auto &celem : set){
     ordered.insert(celem);
+    }
+  uint64_t addr=0;
+  /*
+  std::map<uint64_t, std::vector<uint8_t> > out;
+  vectorize_set(ordered,out);
+  for(auto &access: out){
+    tentropy::CryptoTrace_MemAccess *memaccess = f();
+    memaccess->set_addr(access.first);
+    memaccess->set_data(access.second.data(), access.second.size());
     }*/
-  tentropy::CryptoTrace_MemAccess *memaccess;
+  tentropy::CryptoTrace_MemAccess *memaccess = NULL;
   for(auto &access : ordered){
+   
+    assert(access.first > addr);
+    addr = access.first;
     if(!memaccess || memaccess->addr() + memaccess->data().size() != access.first){
       memaccess = f();
       memaccess->set_addr(access.first);
     }
     memaccess->mutable_data()->push_back(access.second);
-  }
+
+    }
 }
 void trace_cryptoblock(){
   tentropy::CryptoTrace trace;
@@ -116,7 +144,10 @@ void trace_cryptoblock(){
   trace.set_end(end);
   trace_memset(read_set,  [&]() {return trace.add_read();});
   trace_memset(write_set, [&]() {return trace.add_write();});
-  trace.SerializeToFileDescriptor(f_memtrace);
+  auto ser =   trace.SerializeAsString();
+  uint64_t siz  = ser.size();
+  assert(sizeof siz == write(f_memtrace, &siz, sizeof siz));
+  assert(siz == write(f_memtrace, ser.data(), siz));
 }
 int vmem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
   if(!tracing) return 0;
@@ -223,6 +254,6 @@ bool init_plugin(void *self) {
 
 
 void uninit_plugin(void *self) {
-
+  fsync(f_memtrace);
   close(f_memtrace);
 }
