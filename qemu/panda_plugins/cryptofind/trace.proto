@@ -1,0 +1,13 @@
+syntax = "proto2";
+package tentropy;
+message CryptoTrace {
+        required uint64 start = 1;
+        required uint64 end = 2; 
+        message MemAccess {
+                required uint64 addr = 1;
+                required bytes data = 2;
+        }
+        repeated MemAccess write =3 ;
+        repeated MemAccess read=4;
+        repeated MemAccess code =5;
+}

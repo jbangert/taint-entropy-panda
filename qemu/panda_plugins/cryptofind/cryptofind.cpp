@@ -13,7 +13,7 @@
 #ifdef CONFIG_SOFTMMU
 #define RAM_SIZE 512*1024*1024
 #define FIXED_SIZE_RAM
-#endif
+#endif 
 
 extern "C" {
 #include "panda_plugin.h"
@@ -22,8 +22,12 @@ extern "C" {
 #include  "rr_log.h"
 #include "panda_plugin_plugin.h"
 #include "../callstack_instr/callstack_instr.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+  
 }
-
+#include "trace.pb.h"
 #include "iclass.h"
 
 //#include <dlfcn.h>
@@ -55,13 +59,13 @@ std::vector<blockinfo> block_infos;
 #else
 std::unordered_map<target_ulong, blockinfo> block_infos;
 #endif
+uint64_t start,end;
 std::unordered_map<target_ulong, uint8_t> read_set;
 std::unordered_map<target_ulong, uint8_t> write_set;
 blockinfo cumulative;
 bool tracing;
 void *plugin_self;
-FILE *f_memtrace;
-#include "memtrace.h"
+int f_memtrace;
 #ifdef TARGET_I386
 static inline bool heuristic(blockinfo &blk){
   return blk.total_instr >= 16 && blk.arith_instr >= blk.total_instr/2;
@@ -92,24 +96,28 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   }
   return 0;
 }
-static void memtrace(int t, target_ulong addr, char buf){
-  if(!tracing)
-    return;
-  trace_message m ={};
-  m.type= t;
-  m.addr = addr;
-  m.data = buf;
-  fwrite(&m,sizeof m,1,f_memtrace);
-}
-static void dump_memsets(){
-  for(auto &c : read_set){
-    memtrace(CRYPTO_READ,c.first,c.second);
+template <typename functor, typename collection> void trace_memset(const collection &set, const functor &f){
+  std::map<target_ulong, uint8_t> ordered;
+  /* for(auto &celem : collection){
+    ordered.insert(celem);
+    }*/
+  tentropy::CryptoTrace_MemAccess *memaccess;
+  for(auto &access : ordered){
+    if(!memaccess || memaccess->addr() + memaccess->data().size() != access.first){
+      memaccess = f();
+      memaccess->set_addr(access.first);
+    }
+    memaccess->mutable_data()->push_back(access.second);
   }
-  for(auto &c : write_set){
-    memtrace(CRYPTO_WRITE,c.first,c.second);
-  }  
 }
-
+void trace_cryptoblock(){
+  tentropy::CryptoTrace trace;
+  trace.set_start(start);
+  trace.set_end(end);
+  trace_memset(read_set,  [&]() {return trace.add_read();});
+  trace_memset(write_set, [&]() {return trace.add_write();});
+  trace.SerializeToFileDescriptor(f_memtrace);
+}
 int vmem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
   if(!tracing) return 0;
   for(target_ulong i=0;i<size;i++)
@@ -147,23 +155,24 @@ bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
       read_set.clear();
       write_set.clear();
       #ifdef CONFIG_SOFTMMU
-      memtrace(CRYPTO_BEGIN,rr_get_guest_instr_count(),0);
+      start = rr_get_guest_instr_count();
       #else
-      memtrace(CRYPTO_BEGIN,tb->pc,0);
+      start = tb->pc;
       #endif
       
     }
   } else {
     if(!heuristic(cumulative)){
       //The last block we executed was the last crypto block
-      dump_memsets();
+
       #ifdef CONFIG_SOFTMMU
-      memtrace(CRYPTO_END,rr_get_guest_instr_count(),0);
+      end = rr_get_guest_instr_count();
       panda_disable_memcb();
       #else
-      memtrace(CRYPTO_END,tb->pc,0);
+      end = tb->pc;
+      trace_cryptoblock();
       #endif
-      fflush(f_memtrace);
+      //fsync(f_memtrace);
       tracing = false;
     } else {
       cumulative.total_instr  +=  blk.total_instr;
@@ -205,7 +214,7 @@ bool init_plugin(void *self) {
     panda_enable_memcb();
     panda_disable_tb_chaining();
 
-    f_memtrace = fopen("memtrace","wb");
+    f_memtrace = creat("memtracev2",0666);
     cumulative = {0,0};
     tracing = false;
     return true;
@@ -214,6 +223,6 @@ bool init_plugin(void *self) {
 
 
 void uninit_plugin(void *self) {
-  fflush(f_memtrace);
-  fclose(f_memtrace);
+
+  close(f_memtrace);
 }
