@@ -52,7 +52,7 @@ void protobuf_AssignDesc_trace_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockExecution, end_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockExecution, write_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockExecution, read_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockExecution, code_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockExecution, exec_),
   };
   BlockExecution_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -82,9 +82,8 @@ void protobuf_AssignDesc_trace_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BlockExecution_MemAccess));
   CodeBlock_descriptor_ = file->message_type(1);
-  static const int CodeBlock_offsets_[3] = {
+  static const int CodeBlock_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CodeBlock, identifier_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CodeBlock, bytes_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CodeBlock, code_),
   };
   CodeBlock_reflection_ =
@@ -164,12 +163,12 @@ void protobuf_AddDesc_trace_2eproto() {
     "on\022\r\n\005start\030\001 \002(\004\022\013\n\003end\030\002 \002(\004\0221\n\005write\030"
     "\003 \003(\0132\".tentropy.BlockExecution.MemAcces"
     "s\0220\n\004read\030\004 \003(\0132\".tentropy.BlockExecutio"
-    "n.MemAccess\022\014\n\004code\030\005 \003(\014\032\'\n\tMemAccess\022\014"
-    "\n\004addr\030\001 \002(\004\022\014\n\004data\030\002 \002(\014\"<\n\tCodeBlock\022"
-    "\022\n\nidentifier\030\001 \002(\014\022\r\n\005bytes\030\002 \001(\004\022\014\n\004co"
-    "de\030\003 \002(\014\"g\n\005Trace\022#\n\004code\030\001 \001(\0132\023.tentro"
-    "py.CodeBlockH\000\022-\n\texectrace\030\002 \001(\0132\030.tent"
-    "ropy.BlockExecutionH\000B\n\n\010contents", 393);
+    "n.MemAccess\022\014\n\004exec\030\005 \003(\004\032\'\n\tMemAccess\022\014"
+    "\n\004addr\030\001 \002(\004\022\014\n\004data\030\002 \002(\014\"-\n\tCodeBlock\022"
+    "\022\n\nidentifier\030\001 \002(\004\022\014\n\004code\030\003 \002(\014\"g\n\005Tra"
+    "ce\022#\n\004code\030\001 \001(\0132\023.tentropy.CodeBlockH\000\022"
+    "-\n\texectrace\030\002 \001(\0132\030.tentropy.BlockExecu"
+    "tionH\000B\n\n\010contents", 378);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "trace.proto", &protobuf_RegisterTypes);
   BlockExecution::default_instance_ = new BlockExecution();
@@ -471,7 +470,7 @@ const int BlockExecution::kStartFieldNumber;
 const int BlockExecution::kEndFieldNumber;
 const int BlockExecution::kWriteFieldNumber;
 const int BlockExecution::kReadFieldNumber;
-const int BlockExecution::kCodeFieldNumber;
+const int BlockExecution::kExecFieldNumber;
 #endif  // !_MSC_VER
 
 BlockExecution::BlockExecution()
@@ -491,7 +490,6 @@ BlockExecution::BlockExecution(const BlockExecution& from)
 }
 
 void BlockExecution::SharedCtor() {
-  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   start_ = GOOGLE_ULONGLONG(0);
   end_ = GOOGLE_ULONGLONG(0);
@@ -547,7 +545,7 @@ void BlockExecution::Clear() {
 
   write_.Clear();
   read_.Clear();
-  code_.Clear();
+  exec_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -615,20 +613,25 @@ bool BlockExecution::MergePartialFromCodedStream(
           goto handle_unusual;
         }
         if (input->ExpectTag(34)) goto parse_read;
-        if (input->ExpectTag(42)) goto parse_code;
+        if (input->ExpectTag(40)) goto parse_exec;
         break;
       }
 
-      // repeated bytes code = 5;
+      // repeated uint64 exec = 5;
       case 5: {
-        if (tag == 42) {
-         parse_code:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
-                input, this->add_code()));
+        if (tag == 40) {
+         parse_exec:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 1, 40, input, this->mutable_exec())));
+        } else if (tag == 42) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, this->mutable_exec())));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_code;
+        if (input->ExpectTag(40)) goto parse_exec;
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -680,10 +683,10 @@ void BlockExecution::SerializeWithCachedSizes(
       4, this->read(i), output);
   }
 
-  // repeated bytes code = 5;
-  for (int i = 0; i < this->code_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      5, this->code(i), output);
+  // repeated uint64 exec = 5;
+  for (int i = 0; i < this->exec_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(
+      5, this->exec(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -720,10 +723,10 @@ void BlockExecution::SerializeWithCachedSizes(
         4, this->read(i), target);
   }
 
-  // repeated bytes code = 5;
-  for (int i = 0; i < this->code_size(); i++) {
+  // repeated uint64 exec = 5;
+  for (int i = 0; i < this->exec_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
-      WriteBytesToArray(5, this->code(i), target);
+      WriteUInt64ToArray(5, this->exec(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -769,11 +772,14 @@ int BlockExecution::ByteSize() const {
         this->read(i));
   }
 
-  // repeated bytes code = 5;
-  total_size += 1 * this->code_size();
-  for (int i = 0; i < this->code_size(); i++) {
-    total_size += ::google::protobuf::internal::WireFormatLite::BytesSize(
-      this->code(i));
+  // repeated uint64 exec = 5;
+  {
+    int data_size = 0;
+    for (int i = 0; i < this->exec_size(); i++) {
+      data_size += ::google::protobuf::internal::WireFormatLite::
+        UInt64Size(this->exec(i));
+    }
+    total_size += 1 * this->exec_size() + data_size;
   }
 
   if (!unknown_fields().empty()) {
@@ -803,7 +809,7 @@ void BlockExecution::MergeFrom(const BlockExecution& from) {
   GOOGLE_CHECK_NE(&from, this);
   write_.MergeFrom(from.write_);
   read_.MergeFrom(from.read_);
-  code_.MergeFrom(from.code_);
+  exec_.MergeFrom(from.exec_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_start()) {
       set_start(from.start());
@@ -841,7 +847,7 @@ void BlockExecution::Swap(BlockExecution* other) {
     std::swap(end_, other->end_);
     write_.Swap(&other->write_);
     read_.Swap(&other->read_);
-    code_.Swap(&other->code_);
+    exec_.Swap(&other->exec_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -861,7 +867,6 @@ void BlockExecution::Swap(BlockExecution* other) {
 
 #ifndef _MSC_VER
 const int CodeBlock::kIdentifierFieldNumber;
-const int CodeBlock::kBytesFieldNumber;
 const int CodeBlock::kCodeFieldNumber;
 #endif  // !_MSC_VER
 
@@ -884,8 +889,7 @@ CodeBlock::CodeBlock(const CodeBlock& from)
 void CodeBlock::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  identifier_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  bytes_ = GOOGLE_ULONGLONG(0);
+  identifier_ = GOOGLE_ULONGLONG(0);
   code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -896,9 +900,6 @@ CodeBlock::~CodeBlock() {
 }
 
 void CodeBlock::SharedDtor() {
-  if (identifier_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete identifier_;
-  }
   if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete code_;
   }
@@ -928,13 +929,8 @@ CodeBlock* CodeBlock::New() const {
 }
 
 void CodeBlock::Clear() {
-  if (_has_bits_[0 / 32] & 7) {
-    if (has_identifier()) {
-      if (identifier_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        identifier_->clear();
-      }
-    }
-    bytes_ = GOOGLE_ULONGLONG(0);
+  if (_has_bits_[0 / 32] & 3) {
+    identifier_ = GOOGLE_ULONGLONG(0);
     if (has_code()) {
       if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         code_->clear();
@@ -955,26 +951,13 @@ bool CodeBlock::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required bytes identifier = 1;
+      // required uint64 identifier = 1;
       case 1: {
-        if (tag == 10) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
-                input, this->mutable_identifier()));
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(16)) goto parse_bytes;
-        break;
-      }
-
-      // optional uint64 bytes = 2;
-      case 2: {
-        if (tag == 16) {
-         parse_bytes:
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
-                 input, &bytes_)));
-          set_has_bytes();
+                 input, &identifier_)));
+          set_has_identifier();
         } else {
           goto handle_unusual;
         }
@@ -1020,15 +1003,9 @@ failure:
 void CodeBlock::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:tentropy.CodeBlock)
-  // required bytes identifier = 1;
+  // required uint64 identifier = 1;
   if (has_identifier()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      1, this->identifier(), output);
-  }
-
-  // optional uint64 bytes = 2;
-  if (has_bytes()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt64(2, this->bytes(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->identifier(), output);
   }
 
   // required bytes code = 3;
@@ -1047,16 +1024,9 @@ void CodeBlock::SerializeWithCachedSizes(
 ::google::protobuf::uint8* CodeBlock::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:tentropy.CodeBlock)
-  // required bytes identifier = 1;
+  // required uint64 identifier = 1;
   if (has_identifier()) {
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        1, this->identifier(), target);
-  }
-
-  // optional uint64 bytes = 2;
-  if (has_bytes()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(2, this->bytes(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->identifier(), target);
   }
 
   // required bytes code = 3;
@@ -1078,18 +1048,11 @@ int CodeBlock::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required bytes identifier = 1;
+    // required uint64 identifier = 1;
     if (has_identifier()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::BytesSize(
-          this->identifier());
-    }
-
-    // optional uint64 bytes = 2;
-    if (has_bytes()) {
-      total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt64Size(
-          this->bytes());
+          this->identifier());
     }
 
     // required bytes code = 3;
@@ -1129,9 +1092,6 @@ void CodeBlock::MergeFrom(const CodeBlock& from) {
     if (from.has_identifier()) {
       set_identifier(from.identifier());
     }
-    if (from.has_bytes()) {
-      set_bytes(from.bytes());
-    }
     if (from.has_code()) {
       set_code(from.code());
     }
@@ -1152,7 +1112,7 @@ void CodeBlock::CopyFrom(const CodeBlock& from) {
 }
 
 bool CodeBlock::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000005) != 0x00000005) return false;
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
   return true;
 }
@@ -1160,7 +1120,6 @@ bool CodeBlock::IsInitialized() const {
 void CodeBlock::Swap(CodeBlock* other) {
   if (other != this) {
     std::swap(identifier_, other->identifier_);
-    std::swap(bytes_, other->bytes_);
     std::swap(code_, other->code_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);

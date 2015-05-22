@@ -9,7 +9,7 @@ include ../panda.mak
 
 # If you need custom CFLAGS or LIBS, set them up here
 # CFLAGS+=
-LIBS+= -ldistorm3 -lprotobuf
+LIBS+= -ldistorm3 -lprotobuf -lcrypto
 QEMU_CXXFLAGS+= -std=c++11 -O0 -ggdb
 
 # This will make things easier.

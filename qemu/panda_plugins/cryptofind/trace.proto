@@ -9,11 +9,10 @@ message BlockExecution {
         }
         repeated MemAccess write =3 ;
         repeated MemAccess read=4;
-        repeated bytes code =5;
+        repeated uint64 exec =5;
 }
 message CodeBlock {
-        required bytes identifier  = 1; // SHA hash? 
-        optional uint64 bytes =2 ;    //not reliable 
+        required uint64 identifier  = 1; // SHA hash?
         required bytes code = 3;      //
 }
 message Trace {

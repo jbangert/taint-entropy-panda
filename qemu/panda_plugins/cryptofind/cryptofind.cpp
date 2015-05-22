@@ -26,6 +26,7 @@ extern "C" {
 #include <sys/stat.h>
 #include <fcntl.h>
   
+#include <openssl/md5.h>
 }
 #include "trace.pb.h"
 #include "iclass.h"
@@ -60,6 +61,7 @@ std::vector<blockinfo> block_infos;
 std::unordered_map<target_ulong, blockinfo> block_infos;
 #endif
 uint64_t start,end;
+std::vector<uint64_t> exec_trace;
 std::unordered_map<target_ulong, uint8_t> read_set;
 std::unordered_map<target_ulong, uint8_t> write_set;
 blockinfo cumulative;
@@ -75,6 +77,24 @@ void trace_message(::google::protobuf::Message &tr){
 }
 static inline bool heuristic(blockinfo &blk){
   return blk.total_instr >= 16 && blk.arith_instr >= blk.total_instr/2;
+}
+std::unordered_map <target_ulong, uint64_t> block_ids;
+std::unordered_map<std::string, uint64_t> logged_blocks;
+void emplace_block(target_ulong addr,unsigned char *buf, size_t siz){
+  unsigned char hashbuf[16];
+  MD5(buf,siz,hashbuf);
+  std::string hash((const char *)hashbuf, sizeof hashbuf);
+  if(logged_blocks.count(hash)==0){
+    uint64_t id = logged_blocks.size()+1;
+    logged_blocks[hash] = id;
+    tentropy::CodeBlock * cb =new tentropy::CodeBlock();
+    cb->set_identifier(id);
+    cb->set_code(buf,siz);
+    tentropy::Trace tr;
+    tr.set_allocated_code(cb);
+    trace_message(tr);
+  }
+  block_ids[addr] = logged_blocks[hash];
 }
 int after_block_translate(CPUState *env, TranslationBlock *tb){
   #ifdef CONFIG_SOFTMMU
@@ -99,8 +119,7 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   block_infos[physaddr] = blk;
   if(heuristic(blk)){
     printf("Block stats %lX %d %d\n",physaddr, blk.total_instr, blk.arith_instr);
-    auto cb = new tentropy::CodeBlock();
-   
+    emplace_block(tb->pc,buf, tb->size);
   }
   return 0;
 }
@@ -151,6 +170,10 @@ void trace_cryptoblock(){
   trace->set_end(end);
   trace_memset(read_set,  [&]() {return trace->add_read();});
   trace_memset(write_set, [&]() {return trace->add_write();});
+  trace->mutable_exec()->Reserve(exec_trace.size());
+  for(auto &e: exec_trace){
+    trace->mutable_exec()->Add(e);
+  }
   tentropy::Trace tr;
   tr.set_allocated_exectrace(trace);
   trace_message(tr);
@@ -182,21 +205,22 @@ bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
   blockinfo &blk = block_infos[physaddr];
   if(!tracing){
     if(heuristic(blk)){
-      cumulative = blk;
-      tracing = true;
+      read_set.clear();
+      write_set.clear();
+      exec_trace.clear();
 #ifdef CONFIG_SOFTMMU
       panda_enable_memcb();
       panda_do_flush_tb();
       invalidate = true;
 #endif
-      read_set.clear();
-      write_set.clear();
       #ifdef CONFIG_SOFTMMU
       start = rr_get_guest_instr_count();
       #else
       start = tb->pc;
       #endif
-      
+      exec_trace.push_back(block_ids[tb->pc]);
+      cumulative = blk;
+      tracing = true;
     }
   } else {
     if(!heuristic(cumulative)){
@@ -214,7 +238,7 @@ bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
     } else {
       cumulative.total_instr  +=  blk.total_instr;
       cumulative.arith_instr  +=  blk.arith_instr;
-
+      exec_trace.push_back(block_ids[tb->pc]);
       //log execution of this code
     }
   }

@@ -227,21 +227,17 @@ class BlockExecution : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >*
       mutable_read();
 
-  // repeated bytes code = 5;
-  inline int code_size() const;
-  inline void clear_code();
-  static const int kCodeFieldNumber = 5;
-  inline const ::std::string& code(int index) const;
-  inline ::std::string* mutable_code(int index);
-  inline void set_code(int index, const ::std::string& value);
-  inline void set_code(int index, const char* value);
-  inline void set_code(int index, const void* value, size_t size);
-  inline ::std::string* add_code();
-  inline void add_code(const ::std::string& value);
-  inline void add_code(const char* value);
-  inline void add_code(const void* value, size_t size);
-  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& code() const;
-  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_code();
+  // repeated uint64 exec = 5;
+  inline int exec_size() const;
+  inline void clear_exec();
+  static const int kExecFieldNumber = 5;
+  inline ::google::protobuf::uint64 exec(int index) const;
+  inline void set_exec(int index, ::google::protobuf::uint64 value);
+  inline void add_exec(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      exec() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_exec();
 
   // @@protoc_insertion_point(class_scope:tentropy.BlockExecution)
  private:
@@ -258,7 +254,7 @@ class BlockExecution : public ::google::protobuf::Message {
   ::google::protobuf::uint64 end_;
   ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess > write_;
   ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess > read_;
-  ::google::protobuf::RepeatedPtrField< ::std::string> code_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > exec_;
   friend void  protobuf_AddDesc_trace_2eproto();
   friend void protobuf_AssignDesc_trace_2eproto();
   friend void protobuf_ShutdownFile_trace_2eproto();
@@ -321,24 +317,12 @@ class CodeBlock : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required bytes identifier = 1;
+  // required uint64 identifier = 1;
   inline bool has_identifier() const;
   inline void clear_identifier();
   static const int kIdentifierFieldNumber = 1;
-  inline const ::std::string& identifier() const;
-  inline void set_identifier(const ::std::string& value);
-  inline void set_identifier(const char* value);
-  inline void set_identifier(const void* value, size_t size);
-  inline ::std::string* mutable_identifier();
-  inline ::std::string* release_identifier();
-  inline void set_allocated_identifier(::std::string* identifier);
-
-  // optional uint64 bytes = 2;
-  inline bool has_bytes() const;
-  inline void clear_bytes();
-  static const int kBytesFieldNumber = 2;
-  inline ::google::protobuf::uint64 bytes() const;
-  inline void set_bytes(::google::protobuf::uint64 value);
+  inline ::google::protobuf::uint64 identifier() const;
+  inline void set_identifier(::google::protobuf::uint64 value);
 
   // required bytes code = 3;
   inline bool has_code() const;
@@ -356,8 +340,6 @@ class CodeBlock : public ::google::protobuf::Message {
  private:
   inline void set_has_identifier();
   inline void clear_has_identifier();
-  inline void set_has_bytes();
-  inline void clear_has_bytes();
   inline void set_has_code();
   inline void clear_has_code();
 
@@ -365,8 +347,7 @@ class CodeBlock : public ::google::protobuf::Message {
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* identifier_;
-  ::google::protobuf::uint64 bytes_;
+  ::google::protobuf::uint64 identifier_;
   ::std::string* code_;
   friend void  protobuf_AddDesc_trace_2eproto();
   friend void protobuf_AssignDesc_trace_2eproto();
@@ -700,65 +681,41 @@ BlockExecution::mutable_read() {
   return &read_;
 }
 
-// repeated bytes code = 5;
-inline int BlockExecution::code_size() const {
-  return code_.size();
+// repeated uint64 exec = 5;
+inline int BlockExecution::exec_size() const {
+  return exec_.size();
 }
-inline void BlockExecution::clear_code() {
-  code_.Clear();
+inline void BlockExecution::clear_exec() {
+  exec_.Clear();
 }
-inline const ::std::string& BlockExecution::code(int index) const {
-  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.code)
-  return code_.Get(index);
+inline ::google::protobuf::uint64 BlockExecution::exec(int index) const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.exec)
+  return exec_.Get(index);
 }
-inline ::std::string* BlockExecution::mutable_code(int index) {
-  // @@protoc_insertion_point(field_mutable:tentropy.BlockExecution.code)
-  return code_.Mutable(index);
+inline void BlockExecution::set_exec(int index, ::google::protobuf::uint64 value) {
+  exec_.Set(index, value);
+  // @@protoc_insertion_point(field_set:tentropy.BlockExecution.exec)
 }
-inline void BlockExecution::set_code(int index, const ::std::string& value) {
-  // @@protoc_insertion_point(field_set:tentropy.BlockExecution.code)
-  code_.Mutable(index)->assign(value);
+inline void BlockExecution::add_exec(::google::protobuf::uint64 value) {
+  exec_.Add(value);
+  // @@protoc_insertion_point(field_add:tentropy.BlockExecution.exec)
 }
-inline void BlockExecution::set_code(int index, const char* value) {
-  code_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:tentropy.BlockExecution.code)
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+BlockExecution::exec() const {
+  // @@protoc_insertion_point(field_list:tentropy.BlockExecution.exec)
+  return exec_;
 }
-inline void BlockExecution::set_code(int index, const void* value, size_t size) {
-  code_.Mutable(index)->assign(
-    reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:tentropy.BlockExecution.code)
-}
-inline ::std::string* BlockExecution::add_code() {
-  return code_.Add();
-}
-inline void BlockExecution::add_code(const ::std::string& value) {
-  code_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:tentropy.BlockExecution.code)
-}
-inline void BlockExecution::add_code(const char* value) {
-  code_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:tentropy.BlockExecution.code)
-}
-inline void BlockExecution::add_code(const void* value, size_t size) {
-  code_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:tentropy.BlockExecution.code)
-}
-inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
-BlockExecution::code() const {
-  // @@protoc_insertion_point(field_list:tentropy.BlockExecution.code)
-  return code_;
-}
-inline ::google::protobuf::RepeatedPtrField< ::std::string>*
-BlockExecution::mutable_code() {
-  // @@protoc_insertion_point(field_mutable_list:tentropy.BlockExecution.code)
-  return &code_;
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+BlockExecution::mutable_exec() {
+  // @@protoc_insertion_point(field_mutable_list:tentropy.BlockExecution.exec)
+  return &exec_;
 }
 
 // -------------------------------------------------------------------
 
 // CodeBlock
 
-// required bytes identifier = 1;
+// required uint64 identifier = 1;
 inline bool CodeBlock::has_identifier() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -769,104 +726,28 @@ inline void CodeBlock::clear_has_identifier() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void CodeBlock::clear_identifier() {
-  if (identifier_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    identifier_->clear();
-  }
+  identifier_ = GOOGLE_ULONGLONG(0);
   clear_has_identifier();
 }
-inline const ::std::string& CodeBlock::identifier() const {
+inline ::google::protobuf::uint64 CodeBlock::identifier() const {
   // @@protoc_insertion_point(field_get:tentropy.CodeBlock.identifier)
-  return *identifier_;
-}
-inline void CodeBlock::set_identifier(const ::std::string& value) {
-  set_has_identifier();
-  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    identifier_ = new ::std::string;
-  }
-  identifier_->assign(value);
-  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.identifier)
-}
-inline void CodeBlock::set_identifier(const char* value) {
-  set_has_identifier();
-  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    identifier_ = new ::std::string;
-  }
-  identifier_->assign(value);
-  // @@protoc_insertion_point(field_set_char:tentropy.CodeBlock.identifier)
-}
-inline void CodeBlock::set_identifier(const void* value, size_t size) {
-  set_has_identifier();
-  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    identifier_ = new ::std::string;
-  }
-  identifier_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:tentropy.CodeBlock.identifier)
-}
-inline ::std::string* CodeBlock::mutable_identifier() {
-  set_has_identifier();
-  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    identifier_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:tentropy.CodeBlock.identifier)
   return identifier_;
 }
-inline ::std::string* CodeBlock::release_identifier() {
-  clear_has_identifier();
-  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = identifier_;
-    identifier_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void CodeBlock::set_allocated_identifier(::std::string* identifier) {
-  if (identifier_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete identifier_;
-  }
-  if (identifier) {
-    set_has_identifier();
-    identifier_ = identifier;
-  } else {
-    clear_has_identifier();
-    identifier_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:tentropy.CodeBlock.identifier)
-}
-
-// optional uint64 bytes = 2;
-inline bool CodeBlock::has_bytes() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void CodeBlock::set_has_bytes() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void CodeBlock::clear_has_bytes() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void CodeBlock::clear_bytes() {
-  bytes_ = GOOGLE_ULONGLONG(0);
-  clear_has_bytes();
-}
-inline ::google::protobuf::uint64 CodeBlock::bytes() const {
-  // @@protoc_insertion_point(field_get:tentropy.CodeBlock.bytes)
-  return bytes_;
-}
-inline void CodeBlock::set_bytes(::google::protobuf::uint64 value) {
-  set_has_bytes();
-  bytes_ = value;
-  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.bytes)
+inline void CodeBlock::set_identifier(::google::protobuf::uint64 value) {
+  set_has_identifier();
+  identifier_ = value;
+  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.identifier)
 }
 
 // required bytes code = 3;
 inline bool CodeBlock::has_code() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void CodeBlock::set_has_code() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void CodeBlock::clear_has_code() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void CodeBlock::clear_code() {
   if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
