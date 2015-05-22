@@ -33,9 +33,10 @@ else
 fi  
 
 echo $LLVM_BIT
- #--target-list=x86_64-softmmu,i386-softmmu,arm-softmmu,x86_64-linux-user \
+#     --target-list=x86_64-linux-user\
+#--target-list=x86_64-softmmu,i386-softmmu,arm-softmmu,x86_64-linux-user \
 ./configure \
-     --target-list=x86_64-linux-user\
+     --target-list=x86_64-softmmu,x86_64-linux-user \
      --prefix=`pwd`/install \
      --disable-pie \
      --disable-xen \

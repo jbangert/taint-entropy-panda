@@ -1182,8 +1182,8 @@ static void tcg_out_qemu_ld_direct(TCGContext *s, int datalo, int datahi,
 
 #include "panda_plugin.h"
 
-#define CB(size)                                                        \ 
-static void REGPARM panda_user_write_ ## size(target_ulong addr){       \
+#define CB(size)                                                        \
+    static void REGPARM panda_user_write_ ## size(target_ulong addr){   \
     panda_cb_list *plist;                                               \
     uint64_t val = *(uint##size##_t*)g2h(addr);                         \
     for(plist = panda_cbs[PANDA_CB_VIRT_MEM_WRITE]; plist != NULL;      \
@@ -1228,12 +1228,12 @@ static void pandauser_restorereg(TCGContext *s){
     tcg_out_pop(s,TCG_REG_RDI);
     tcg_out_pop(s,TCG_REG_RBP);
 }
-
-#endif
 CB(8)
 CB(16)
 CB(32)
 CB(64)
+
+#endif
 /* XXX: qemu_ld and qemu_st could be modified to clobber only EDX and
    EAX. It will be useful once fixed registers globals are less
    common. */
