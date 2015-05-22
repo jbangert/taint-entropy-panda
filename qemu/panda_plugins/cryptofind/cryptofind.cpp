@@ -80,21 +80,32 @@ static inline bool heuristic(blockinfo &blk){
 }
 std::unordered_map <target_ulong, uint64_t> block_ids;
 std::unordered_map<std::string, uint64_t> logged_blocks;
-void emplace_block(target_ulong addr,unsigned char *buf, size_t siz){
-  unsigned char hashbuf[16];
-  MD5(buf,siz,hashbuf);
-  std::string hash((const char *)hashbuf, sizeof hashbuf);
-  if(logged_blocks.count(hash)==0){
-    uint64_t id = logged_blocks.size()+1;
-    logged_blocks[hash] = id;
-    tentropy::CodeBlock * cb =new tentropy::CodeBlock();
-    cb->set_identifier(id);
-    cb->set_code(buf,siz);
-    tentropy::Trace tr;
-    tr.set_allocated_code(cb);
-    trace_message(tr);
+void log_block_execution(CPUState *env,TranslationBlock *tb){
+  if(block_ids.count(tb->pc) == 0){
+    unsigned char *buf = (unsigned char *) malloc(tb->size);
+    int err = panda_virtual_memory_rw(env, tb->pc, buf, tb->size, 0);
+    if(err == -1){
+      fprintf(stderr, "Error reading block %lX\n ", (unsigned long)tb->pc);
+      free(buf);
+      return;
+    }
+    unsigned char hashbuf[16];
+    MD5(buf,tb->size,hashbuf);
+    std::string hash((const char *)hashbuf, sizeof hashbuf);
+    if(logged_blocks.count(hash)==0){
+      uint64_t id = logged_blocks.size()+1;
+      logged_blocks[hash] = id;
+      tentropy::CodeBlock * cb =new tentropy::CodeBlock();
+      cb->set_identifier(id);
+      cb->set_code(buf,tb->size);
+      tentropy::Trace tr;
+      tr.set_allocated_code(cb);
+      trace_message(tr);
+    }
+    block_ids[tb->pc] = logged_blocks[hash];
+    free(buf);
   }
-  block_ids[addr] = logged_blocks[hash];
+  exec_trace.push_back(block_ids[tb->pc]);
 }
 int after_block_translate(CPUState *env, TranslationBlock *tb){
   #ifdef CONFIG_SOFTMMU
@@ -112,15 +123,17 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   int err = panda_virtual_memory_rw(env, tb->pc, buf, tb->size, 0);
   if(err == -1){
     fprintf(stderr, "Error reading block %lX\n ", (unsigned long)tb->pc);
+    free(buf);
     return 0;
   }
   bool use64 = (env->hflags & HF_LMA_MASK) != 0;
   blockinfo blk = get_block_stats(buf, tb->pc, tb->size, use64);
   block_infos[physaddr] = blk;
+  block_ids.erase(tb->pc);
   if(heuristic(blk)){
     printf("Block stats %lX %d %d\n",physaddr, blk.total_instr, blk.arith_instr);
-    emplace_block(tb->pc,buf, tb->size);
   }
+  free(buf);
   return 0;
 }
 void vectorize_set(std::map<uint64_t, uint8_t> &m, std::map<uint64_t, std::vector<uint8_t> > &out){
@@ -218,7 +231,7 @@ bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
       #else
       start = tb->pc;
       #endif
-      exec_trace.push_back(block_ids[tb->pc]);
+      log_block_execution(env,tb);
       cumulative = blk;
       tracing = true;
     }
@@ -238,8 +251,7 @@ bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
     } else {
       cumulative.total_instr  +=  blk.total_instr;
       cumulative.arith_instr  +=  blk.arith_instr;
-      exec_trace.push_back(block_ids[tb->pc]);
-      //log execution of this code
+      log_block_execution(env,tb);
     }
   }
   return invalidate;
