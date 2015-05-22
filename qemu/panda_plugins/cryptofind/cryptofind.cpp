@@ -67,6 +67,12 @@ bool tracing;
 void *plugin_self;
 int f_memtrace;
 #ifdef TARGET_I386
+void trace_message(::google::protobuf::Message &tr){
+  auto ser =   tr.SerializeAsString();
+  uint64_t siz  = ser.size();
+  assert(sizeof siz == write(f_memtrace, &siz, sizeof siz));
+  assert(siz == write(f_memtrace, ser.data(), siz));
+}
 static inline bool heuristic(blockinfo &blk){
   return blk.total_instr >= 16 && blk.arith_instr >= blk.total_instr/2;
 }
@@ -93,6 +99,8 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
   block_infos[physaddr] = blk;
   if(heuristic(blk)){
     printf("Block stats %lX %d %d\n",physaddr, blk.total_instr, blk.arith_instr);
+    auto cb = new tentropy::CodeBlock();
+   
   }
   return 0;
 }
@@ -101,8 +109,7 @@ void vectorize_set(std::map<uint64_t, uint8_t> &m, std::map<uint64_t, std::vecto
   int size=-1;
   std::vector<uint8_t> * v;
   for (auto &c: m){
-    if(lastaddr +1!= c.first || size  == -1){
-      
+    if(lastaddr +1!= c.first || size  == -1){      
       size = 0;
       v = &out[c.first];
     }
@@ -125,7 +132,7 @@ template <typename functor, typename collection> void trace_memset(const collect
     memaccess->set_addr(access.first);
     memaccess->set_data(access.second.data(), access.second.size());
     }*/
-  tentropy::CryptoTrace_MemAccess *memaccess = NULL;
+  tentropy::BlockExecution_MemAccess *memaccess = NULL;
   for(auto &access : ordered){
    
     assert(access.first > addr);
@@ -139,15 +146,14 @@ template <typename functor, typename collection> void trace_memset(const collect
     }
 }
 void trace_cryptoblock(){
-  tentropy::CryptoTrace trace;
-  trace.set_start(start);
-  trace.set_end(end);
-  trace_memset(read_set,  [&]() {return trace.add_read();});
-  trace_memset(write_set, [&]() {return trace.add_write();});
-  auto ser =   trace.SerializeAsString();
-  uint64_t siz  = ser.size();
-  assert(sizeof siz == write(f_memtrace, &siz, sizeof siz));
-  assert(siz == write(f_memtrace, ser.data(), siz));
+  tentropy::BlockExecution * trace =new tentropy::BlockExecution();
+  trace->set_start(start);
+  trace->set_end(end);
+  trace_memset(read_set,  [&]() {return trace->add_read();});
+  trace_memset(write_set, [&]() {return trace->add_write();});
+  tentropy::Trace tr;
+  tr.set_allocated_exectrace(trace);
+  trace_message(tr);
 }
 int vmem_read(CPUState *env, target_ulong pc, target_ulong addr, target_ulong size, void *buf){
   if(!tracing) return 0;
@@ -208,6 +214,8 @@ bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
     } else {
       cumulative.total_instr  +=  blk.total_instr;
       cumulative.arith_instr  +=  blk.arith_instr;
+
+      //log execution of this code
     }
   }
   return invalidate;

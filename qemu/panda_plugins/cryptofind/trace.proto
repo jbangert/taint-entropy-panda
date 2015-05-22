@@ -1,6 +1,6 @@
 syntax = "proto2";
 package tentropy;
-message CryptoTrace {
+message BlockExecution { 
         required uint64 start = 1;
         required uint64 end = 2; 
         message MemAccess {
@@ -9,5 +9,16 @@ message CryptoTrace {
         }
         repeated MemAccess write =3 ;
         repeated MemAccess read=4;
-        repeated MemAccess code =5;
+        repeated bytes code =5;
+}
+message CodeBlock {
+        required bytes identifier  = 1; // SHA hash? 
+        optional uint64 bytes =2 ;    //not reliable 
+        required bytes code = 3;      //
+}
+message Trace {
+        oneof contents {
+             CodeBlock code = 1;
+             BlockExecution exectrace = 2;
+        }
 }

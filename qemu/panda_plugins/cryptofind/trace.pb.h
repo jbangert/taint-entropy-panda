@@ -33,19 +33,21 @@ void  protobuf_AddDesc_trace_2eproto();
 void protobuf_AssignDesc_trace_2eproto();
 void protobuf_ShutdownFile_trace_2eproto();
 
-class CryptoTrace;
-class CryptoTrace_MemAccess;
+class BlockExecution;
+class BlockExecution_MemAccess;
+class CodeBlock;
+class Trace;
 
 // ===================================================================
 
-class CryptoTrace_MemAccess : public ::google::protobuf::Message {
+class BlockExecution_MemAccess : public ::google::protobuf::Message {
  public:
-  CryptoTrace_MemAccess();
-  virtual ~CryptoTrace_MemAccess();
+  BlockExecution_MemAccess();
+  virtual ~BlockExecution_MemAccess();
 
-  CryptoTrace_MemAccess(const CryptoTrace_MemAccess& from);
+  BlockExecution_MemAccess(const BlockExecution_MemAccess& from);
 
-  inline CryptoTrace_MemAccess& operator=(const CryptoTrace_MemAccess& from) {
+  inline BlockExecution_MemAccess& operator=(const BlockExecution_MemAccess& from) {
     CopyFrom(from);
     return *this;
   }
@@ -59,17 +61,17 @@ class CryptoTrace_MemAccess : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const CryptoTrace_MemAccess& default_instance();
+  static const BlockExecution_MemAccess& default_instance();
 
-  void Swap(CryptoTrace_MemAccess* other);
+  void Swap(BlockExecution_MemAccess* other);
 
   // implements Message ----------------------------------------------
 
-  CryptoTrace_MemAccess* New() const;
+  BlockExecution_MemAccess* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const CryptoTrace_MemAccess& from);
-  void MergeFrom(const CryptoTrace_MemAccess& from);
+  void CopyFrom(const BlockExecution_MemAccess& from);
+  void MergeFrom(const BlockExecution_MemAccess& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -110,7 +112,7 @@ class CryptoTrace_MemAccess : public ::google::protobuf::Message {
   inline ::std::string* release_data();
   inline void set_allocated_data(::std::string* data);
 
-  // @@protoc_insertion_point(class_scope:tentropy.CryptoTrace.MemAccess)
+  // @@protoc_insertion_point(class_scope:tentropy.BlockExecution.MemAccess)
  private:
   inline void set_has_addr();
   inline void clear_has_addr();
@@ -128,18 +130,18 @@ class CryptoTrace_MemAccess : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_trace_2eproto();
 
   void InitAsDefaultInstance();
-  static CryptoTrace_MemAccess* default_instance_;
+  static BlockExecution_MemAccess* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class CryptoTrace : public ::google::protobuf::Message {
+class BlockExecution : public ::google::protobuf::Message {
  public:
-  CryptoTrace();
-  virtual ~CryptoTrace();
+  BlockExecution();
+  virtual ~BlockExecution();
 
-  CryptoTrace(const CryptoTrace& from);
+  BlockExecution(const BlockExecution& from);
 
-  inline CryptoTrace& operator=(const CryptoTrace& from) {
+  inline BlockExecution& operator=(const BlockExecution& from) {
     CopyFrom(from);
     return *this;
   }
@@ -153,17 +155,17 @@ class CryptoTrace : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const CryptoTrace& default_instance();
+  static const BlockExecution& default_instance();
 
-  void Swap(CryptoTrace* other);
+  void Swap(BlockExecution* other);
 
   // implements Message ----------------------------------------------
 
-  CryptoTrace* New() const;
+  BlockExecution* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const CryptoTrace& from);
-  void MergeFrom(const CryptoTrace& from);
+  void CopyFrom(const BlockExecution& from);
+  void MergeFrom(const BlockExecution& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -183,7 +185,7 @@ class CryptoTrace : public ::google::protobuf::Message {
 
   // nested types ----------------------------------------------------
 
-  typedef CryptoTrace_MemAccess MemAccess;
+  typedef BlockExecution_MemAccess MemAccess;
 
   // accessors -------------------------------------------------------
 
@@ -201,43 +203,47 @@ class CryptoTrace : public ::google::protobuf::Message {
   inline ::google::protobuf::uint64 end() const;
   inline void set_end(::google::protobuf::uint64 value);
 
-  // repeated .tentropy.CryptoTrace.MemAccess write = 3;
+  // repeated .tentropy.BlockExecution.MemAccess write = 3;
   inline int write_size() const;
   inline void clear_write();
   static const int kWriteFieldNumber = 3;
-  inline const ::tentropy::CryptoTrace_MemAccess& write(int index) const;
-  inline ::tentropy::CryptoTrace_MemAccess* mutable_write(int index);
-  inline ::tentropy::CryptoTrace_MemAccess* add_write();
-  inline const ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >&
+  inline const ::tentropy::BlockExecution_MemAccess& write(int index) const;
+  inline ::tentropy::BlockExecution_MemAccess* mutable_write(int index);
+  inline ::tentropy::BlockExecution_MemAccess* add_write();
+  inline const ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >&
       write() const;
-  inline ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >*
+  inline ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >*
       mutable_write();
 
-  // repeated .tentropy.CryptoTrace.MemAccess read = 4;
+  // repeated .tentropy.BlockExecution.MemAccess read = 4;
   inline int read_size() const;
   inline void clear_read();
   static const int kReadFieldNumber = 4;
-  inline const ::tentropy::CryptoTrace_MemAccess& read(int index) const;
-  inline ::tentropy::CryptoTrace_MemAccess* mutable_read(int index);
-  inline ::tentropy::CryptoTrace_MemAccess* add_read();
-  inline const ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >&
+  inline const ::tentropy::BlockExecution_MemAccess& read(int index) const;
+  inline ::tentropy::BlockExecution_MemAccess* mutable_read(int index);
+  inline ::tentropy::BlockExecution_MemAccess* add_read();
+  inline const ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >&
       read() const;
-  inline ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >*
+  inline ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >*
       mutable_read();
 
-  // repeated .tentropy.CryptoTrace.MemAccess code = 5;
+  // repeated bytes code = 5;
   inline int code_size() const;
   inline void clear_code();
   static const int kCodeFieldNumber = 5;
-  inline const ::tentropy::CryptoTrace_MemAccess& code(int index) const;
-  inline ::tentropy::CryptoTrace_MemAccess* mutable_code(int index);
-  inline ::tentropy::CryptoTrace_MemAccess* add_code();
-  inline const ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >&
-      code() const;
-  inline ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >*
-      mutable_code();
+  inline const ::std::string& code(int index) const;
+  inline ::std::string* mutable_code(int index);
+  inline void set_code(int index, const ::std::string& value);
+  inline void set_code(int index, const char* value);
+  inline void set_code(int index, const void* value, size_t size);
+  inline ::std::string* add_code();
+  inline void add_code(const ::std::string& value);
+  inline void add_code(const char* value);
+  inline void add_code(const void* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& code() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_code();
 
-  // @@protoc_insertion_point(class_scope:tentropy.CryptoTrace)
+  // @@protoc_insertion_point(class_scope:tentropy.BlockExecution)
  private:
   inline void set_has_start();
   inline void clear_has_start();
@@ -250,100 +256,315 @@ class CryptoTrace : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::google::protobuf::uint64 start_;
   ::google::protobuf::uint64 end_;
-  ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess > write_;
-  ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess > read_;
-  ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess > code_;
+  ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess > write_;
+  ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess > read_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> code_;
   friend void  protobuf_AddDesc_trace_2eproto();
   friend void protobuf_AssignDesc_trace_2eproto();
   friend void protobuf_ShutdownFile_trace_2eproto();
 
   void InitAsDefaultInstance();
-  static CryptoTrace* default_instance_;
+  static BlockExecution* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class CodeBlock : public ::google::protobuf::Message {
+ public:
+  CodeBlock();
+  virtual ~CodeBlock();
+
+  CodeBlock(const CodeBlock& from);
+
+  inline CodeBlock& operator=(const CodeBlock& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const CodeBlock& default_instance();
+
+  void Swap(CodeBlock* other);
+
+  // implements Message ----------------------------------------------
+
+  CodeBlock* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const CodeBlock& from);
+  void MergeFrom(const CodeBlock& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required bytes identifier = 1;
+  inline bool has_identifier() const;
+  inline void clear_identifier();
+  static const int kIdentifierFieldNumber = 1;
+  inline const ::std::string& identifier() const;
+  inline void set_identifier(const ::std::string& value);
+  inline void set_identifier(const char* value);
+  inline void set_identifier(const void* value, size_t size);
+  inline ::std::string* mutable_identifier();
+  inline ::std::string* release_identifier();
+  inline void set_allocated_identifier(::std::string* identifier);
+
+  // optional uint64 bytes = 2;
+  inline bool has_bytes() const;
+  inline void clear_bytes();
+  static const int kBytesFieldNumber = 2;
+  inline ::google::protobuf::uint64 bytes() const;
+  inline void set_bytes(::google::protobuf::uint64 value);
+
+  // required bytes code = 3;
+  inline bool has_code() const;
+  inline void clear_code();
+  static const int kCodeFieldNumber = 3;
+  inline const ::std::string& code() const;
+  inline void set_code(const ::std::string& value);
+  inline void set_code(const char* value);
+  inline void set_code(const void* value, size_t size);
+  inline ::std::string* mutable_code();
+  inline ::std::string* release_code();
+  inline void set_allocated_code(::std::string* code);
+
+  // @@protoc_insertion_point(class_scope:tentropy.CodeBlock)
+ private:
+  inline void set_has_identifier();
+  inline void clear_has_identifier();
+  inline void set_has_bytes();
+  inline void clear_has_bytes();
+  inline void set_has_code();
+  inline void clear_has_code();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::std::string* identifier_;
+  ::google::protobuf::uint64 bytes_;
+  ::std::string* code_;
+  friend void  protobuf_AddDesc_trace_2eproto();
+  friend void protobuf_AssignDesc_trace_2eproto();
+  friend void protobuf_ShutdownFile_trace_2eproto();
+
+  void InitAsDefaultInstance();
+  static CodeBlock* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Trace : public ::google::protobuf::Message {
+ public:
+  Trace();
+  virtual ~Trace();
+
+  Trace(const Trace& from);
+
+  inline Trace& operator=(const Trace& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Trace& default_instance();
+
+  enum ContentsCase {
+    kCode = 1,
+    kExectrace = 2,
+    CONTENTS_NOT_SET = 0,
+  };
+
+  void Swap(Trace* other);
+
+  // implements Message ----------------------------------------------
+
+  Trace* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Trace& from);
+  void MergeFrom(const Trace& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .tentropy.CodeBlock code = 1;
+  inline bool has_code() const;
+  inline void clear_code();
+  static const int kCodeFieldNumber = 1;
+  inline const ::tentropy::CodeBlock& code() const;
+  inline ::tentropy::CodeBlock* mutable_code();
+  inline ::tentropy::CodeBlock* release_code();
+  inline void set_allocated_code(::tentropy::CodeBlock* code);
+
+  // optional .tentropy.BlockExecution exectrace = 2;
+  inline bool has_exectrace() const;
+  inline void clear_exectrace();
+  static const int kExectraceFieldNumber = 2;
+  inline const ::tentropy::BlockExecution& exectrace() const;
+  inline ::tentropy::BlockExecution* mutable_exectrace();
+  inline ::tentropy::BlockExecution* release_exectrace();
+  inline void set_allocated_exectrace(::tentropy::BlockExecution* exectrace);
+
+  inline ContentsCase contents_case() const;
+  // @@protoc_insertion_point(class_scope:tentropy.Trace)
+ private:
+  inline void set_has_code();
+  inline void set_has_exectrace();
+
+  inline bool has_contents();
+  void clear_contents();
+  inline void clear_has_contents();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  union ContentsUnion {
+    ::tentropy::CodeBlock* code_;
+    ::tentropy::BlockExecution* exectrace_;
+  } contents_;
+  ::google::protobuf::uint32 _oneof_case_[1];
+
+  friend void  protobuf_AddDesc_trace_2eproto();
+  friend void protobuf_AssignDesc_trace_2eproto();
+  friend void protobuf_ShutdownFile_trace_2eproto();
+
+  void InitAsDefaultInstance();
+  static Trace* default_instance_;
 };
 // ===================================================================
 
 
 // ===================================================================
 
-// CryptoTrace_MemAccess
+// BlockExecution_MemAccess
 
 // required uint64 addr = 1;
-inline bool CryptoTrace_MemAccess::has_addr() const {
+inline bool BlockExecution_MemAccess::has_addr() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void CryptoTrace_MemAccess::set_has_addr() {
+inline void BlockExecution_MemAccess::set_has_addr() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void CryptoTrace_MemAccess::clear_has_addr() {
+inline void BlockExecution_MemAccess::clear_has_addr() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void CryptoTrace_MemAccess::clear_addr() {
+inline void BlockExecution_MemAccess::clear_addr() {
   addr_ = GOOGLE_ULONGLONG(0);
   clear_has_addr();
 }
-inline ::google::protobuf::uint64 CryptoTrace_MemAccess::addr() const {
-  // @@protoc_insertion_point(field_get:tentropy.CryptoTrace.MemAccess.addr)
+inline ::google::protobuf::uint64 BlockExecution_MemAccess::addr() const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.MemAccess.addr)
   return addr_;
 }
-inline void CryptoTrace_MemAccess::set_addr(::google::protobuf::uint64 value) {
+inline void BlockExecution_MemAccess::set_addr(::google::protobuf::uint64 value) {
   set_has_addr();
   addr_ = value;
-  // @@protoc_insertion_point(field_set:tentropy.CryptoTrace.MemAccess.addr)
+  // @@protoc_insertion_point(field_set:tentropy.BlockExecution.MemAccess.addr)
 }
 
 // required bytes data = 2;
-inline bool CryptoTrace_MemAccess::has_data() const {
+inline bool BlockExecution_MemAccess::has_data() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void CryptoTrace_MemAccess::set_has_data() {
+inline void BlockExecution_MemAccess::set_has_data() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void CryptoTrace_MemAccess::clear_has_data() {
+inline void BlockExecution_MemAccess::clear_has_data() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void CryptoTrace_MemAccess::clear_data() {
+inline void BlockExecution_MemAccess::clear_data() {
   if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     data_->clear();
   }
   clear_has_data();
 }
-inline const ::std::string& CryptoTrace_MemAccess::data() const {
-  // @@protoc_insertion_point(field_get:tentropy.CryptoTrace.MemAccess.data)
+inline const ::std::string& BlockExecution_MemAccess::data() const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.MemAccess.data)
   return *data_;
 }
-inline void CryptoTrace_MemAccess::set_data(const ::std::string& value) {
+inline void BlockExecution_MemAccess::set_data(const ::std::string& value) {
   set_has_data();
   if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     data_ = new ::std::string;
   }
   data_->assign(value);
-  // @@protoc_insertion_point(field_set:tentropy.CryptoTrace.MemAccess.data)
+  // @@protoc_insertion_point(field_set:tentropy.BlockExecution.MemAccess.data)
 }
-inline void CryptoTrace_MemAccess::set_data(const char* value) {
+inline void BlockExecution_MemAccess::set_data(const char* value) {
   set_has_data();
   if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     data_ = new ::std::string;
   }
   data_->assign(value);
-  // @@protoc_insertion_point(field_set_char:tentropy.CryptoTrace.MemAccess.data)
+  // @@protoc_insertion_point(field_set_char:tentropy.BlockExecution.MemAccess.data)
 }
-inline void CryptoTrace_MemAccess::set_data(const void* value, size_t size) {
+inline void BlockExecution_MemAccess::set_data(const void* value, size_t size) {
   set_has_data();
   if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     data_ = new ::std::string;
   }
   data_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:tentropy.CryptoTrace.MemAccess.data)
+  // @@protoc_insertion_point(field_set_pointer:tentropy.BlockExecution.MemAccess.data)
 }
-inline ::std::string* CryptoTrace_MemAccess::mutable_data() {
+inline ::std::string* BlockExecution_MemAccess::mutable_data() {
   set_has_data();
   if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     data_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:tentropy.CryptoTrace.MemAccess.data)
+  // @@protoc_insertion_point(field_mutable:tentropy.BlockExecution.MemAccess.data)
   return data_;
 }
-inline ::std::string* CryptoTrace_MemAccess::release_data() {
+inline ::std::string* BlockExecution_MemAccess::release_data() {
   clear_has_data();
   if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
@@ -353,7 +574,7 @@ inline ::std::string* CryptoTrace_MemAccess::release_data() {
     return temp;
   }
 }
-inline void CryptoTrace_MemAccess::set_allocated_data(::std::string* data) {
+inline void BlockExecution_MemAccess::set_allocated_data(::std::string* data) {
   if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete data_;
   }
@@ -364,151 +585,454 @@ inline void CryptoTrace_MemAccess::set_allocated_data(::std::string* data) {
     clear_has_data();
     data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:tentropy.CryptoTrace.MemAccess.data)
+  // @@protoc_insertion_point(field_set_allocated:tentropy.BlockExecution.MemAccess.data)
 }
 
 // -------------------------------------------------------------------
 
-// CryptoTrace
+// BlockExecution
 
 // required uint64 start = 1;
-inline bool CryptoTrace::has_start() const {
+inline bool BlockExecution::has_start() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void CryptoTrace::set_has_start() {
+inline void BlockExecution::set_has_start() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void CryptoTrace::clear_has_start() {
+inline void BlockExecution::clear_has_start() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void CryptoTrace::clear_start() {
+inline void BlockExecution::clear_start() {
   start_ = GOOGLE_ULONGLONG(0);
   clear_has_start();
 }
-inline ::google::protobuf::uint64 CryptoTrace::start() const {
-  // @@protoc_insertion_point(field_get:tentropy.CryptoTrace.start)
+inline ::google::protobuf::uint64 BlockExecution::start() const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.start)
   return start_;
 }
-inline void CryptoTrace::set_start(::google::protobuf::uint64 value) {
+inline void BlockExecution::set_start(::google::protobuf::uint64 value) {
   set_has_start();
   start_ = value;
-  // @@protoc_insertion_point(field_set:tentropy.CryptoTrace.start)
+  // @@protoc_insertion_point(field_set:tentropy.BlockExecution.start)
 }
 
 // required uint64 end = 2;
-inline bool CryptoTrace::has_end() const {
+inline bool BlockExecution::has_end() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void CryptoTrace::set_has_end() {
+inline void BlockExecution::set_has_end() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void CryptoTrace::clear_has_end() {
+inline void BlockExecution::clear_has_end() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void CryptoTrace::clear_end() {
+inline void BlockExecution::clear_end() {
   end_ = GOOGLE_ULONGLONG(0);
   clear_has_end();
 }
-inline ::google::protobuf::uint64 CryptoTrace::end() const {
-  // @@protoc_insertion_point(field_get:tentropy.CryptoTrace.end)
+inline ::google::protobuf::uint64 BlockExecution::end() const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.end)
   return end_;
 }
-inline void CryptoTrace::set_end(::google::protobuf::uint64 value) {
+inline void BlockExecution::set_end(::google::protobuf::uint64 value) {
   set_has_end();
   end_ = value;
-  // @@protoc_insertion_point(field_set:tentropy.CryptoTrace.end)
+  // @@protoc_insertion_point(field_set:tentropy.BlockExecution.end)
 }
 
-// repeated .tentropy.CryptoTrace.MemAccess write = 3;
-inline int CryptoTrace::write_size() const {
+// repeated .tentropy.BlockExecution.MemAccess write = 3;
+inline int BlockExecution::write_size() const {
   return write_.size();
 }
-inline void CryptoTrace::clear_write() {
+inline void BlockExecution::clear_write() {
   write_.Clear();
 }
-inline const ::tentropy::CryptoTrace_MemAccess& CryptoTrace::write(int index) const {
-  // @@protoc_insertion_point(field_get:tentropy.CryptoTrace.write)
+inline const ::tentropy::BlockExecution_MemAccess& BlockExecution::write(int index) const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.write)
   return write_.Get(index);
 }
-inline ::tentropy::CryptoTrace_MemAccess* CryptoTrace::mutable_write(int index) {
-  // @@protoc_insertion_point(field_mutable:tentropy.CryptoTrace.write)
+inline ::tentropy::BlockExecution_MemAccess* BlockExecution::mutable_write(int index) {
+  // @@protoc_insertion_point(field_mutable:tentropy.BlockExecution.write)
   return write_.Mutable(index);
 }
-inline ::tentropy::CryptoTrace_MemAccess* CryptoTrace::add_write() {
-  // @@protoc_insertion_point(field_add:tentropy.CryptoTrace.write)
+inline ::tentropy::BlockExecution_MemAccess* BlockExecution::add_write() {
+  // @@protoc_insertion_point(field_add:tentropy.BlockExecution.write)
   return write_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >&
-CryptoTrace::write() const {
-  // @@protoc_insertion_point(field_list:tentropy.CryptoTrace.write)
+inline const ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >&
+BlockExecution::write() const {
+  // @@protoc_insertion_point(field_list:tentropy.BlockExecution.write)
   return write_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >*
-CryptoTrace::mutable_write() {
-  // @@protoc_insertion_point(field_mutable_list:tentropy.CryptoTrace.write)
+inline ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >*
+BlockExecution::mutable_write() {
+  // @@protoc_insertion_point(field_mutable_list:tentropy.BlockExecution.write)
   return &write_;
 }
 
-// repeated .tentropy.CryptoTrace.MemAccess read = 4;
-inline int CryptoTrace::read_size() const {
+// repeated .tentropy.BlockExecution.MemAccess read = 4;
+inline int BlockExecution::read_size() const {
   return read_.size();
 }
-inline void CryptoTrace::clear_read() {
+inline void BlockExecution::clear_read() {
   read_.Clear();
 }
-inline const ::tentropy::CryptoTrace_MemAccess& CryptoTrace::read(int index) const {
-  // @@protoc_insertion_point(field_get:tentropy.CryptoTrace.read)
+inline const ::tentropy::BlockExecution_MemAccess& BlockExecution::read(int index) const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.read)
   return read_.Get(index);
 }
-inline ::tentropy::CryptoTrace_MemAccess* CryptoTrace::mutable_read(int index) {
-  // @@protoc_insertion_point(field_mutable:tentropy.CryptoTrace.read)
+inline ::tentropy::BlockExecution_MemAccess* BlockExecution::mutable_read(int index) {
+  // @@protoc_insertion_point(field_mutable:tentropy.BlockExecution.read)
   return read_.Mutable(index);
 }
-inline ::tentropy::CryptoTrace_MemAccess* CryptoTrace::add_read() {
-  // @@protoc_insertion_point(field_add:tentropy.CryptoTrace.read)
+inline ::tentropy::BlockExecution_MemAccess* BlockExecution::add_read() {
+  // @@protoc_insertion_point(field_add:tentropy.BlockExecution.read)
   return read_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >&
-CryptoTrace::read() const {
-  // @@protoc_insertion_point(field_list:tentropy.CryptoTrace.read)
+inline const ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >&
+BlockExecution::read() const {
+  // @@protoc_insertion_point(field_list:tentropy.BlockExecution.read)
   return read_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >*
-CryptoTrace::mutable_read() {
-  // @@protoc_insertion_point(field_mutable_list:tentropy.CryptoTrace.read)
+inline ::google::protobuf::RepeatedPtrField< ::tentropy::BlockExecution_MemAccess >*
+BlockExecution::mutable_read() {
+  // @@protoc_insertion_point(field_mutable_list:tentropy.BlockExecution.read)
   return &read_;
 }
 
-// repeated .tentropy.CryptoTrace.MemAccess code = 5;
-inline int CryptoTrace::code_size() const {
+// repeated bytes code = 5;
+inline int BlockExecution::code_size() const {
   return code_.size();
 }
-inline void CryptoTrace::clear_code() {
+inline void BlockExecution::clear_code() {
   code_.Clear();
 }
-inline const ::tentropy::CryptoTrace_MemAccess& CryptoTrace::code(int index) const {
-  // @@protoc_insertion_point(field_get:tentropy.CryptoTrace.code)
+inline const ::std::string& BlockExecution::code(int index) const {
+  // @@protoc_insertion_point(field_get:tentropy.BlockExecution.code)
   return code_.Get(index);
 }
-inline ::tentropy::CryptoTrace_MemAccess* CryptoTrace::mutable_code(int index) {
-  // @@protoc_insertion_point(field_mutable:tentropy.CryptoTrace.code)
+inline ::std::string* BlockExecution::mutable_code(int index) {
+  // @@protoc_insertion_point(field_mutable:tentropy.BlockExecution.code)
   return code_.Mutable(index);
 }
-inline ::tentropy::CryptoTrace_MemAccess* CryptoTrace::add_code() {
-  // @@protoc_insertion_point(field_add:tentropy.CryptoTrace.code)
+inline void BlockExecution::set_code(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:tentropy.BlockExecution.code)
+  code_.Mutable(index)->assign(value);
+}
+inline void BlockExecution::set_code(int index, const char* value) {
+  code_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:tentropy.BlockExecution.code)
+}
+inline void BlockExecution::set_code(int index, const void* value, size_t size) {
+  code_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:tentropy.BlockExecution.code)
+}
+inline ::std::string* BlockExecution::add_code() {
   return code_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >&
-CryptoTrace::code() const {
-  // @@protoc_insertion_point(field_list:tentropy.CryptoTrace.code)
+inline void BlockExecution::add_code(const ::std::string& value) {
+  code_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:tentropy.BlockExecution.code)
+}
+inline void BlockExecution::add_code(const char* value) {
+  code_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:tentropy.BlockExecution.code)
+}
+inline void BlockExecution::add_code(const void* value, size_t size) {
+  code_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:tentropy.BlockExecution.code)
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+BlockExecution::code() const {
+  // @@protoc_insertion_point(field_list:tentropy.BlockExecution.code)
   return code_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::tentropy::CryptoTrace_MemAccess >*
-CryptoTrace::mutable_code() {
-  // @@protoc_insertion_point(field_mutable_list:tentropy.CryptoTrace.code)
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+BlockExecution::mutable_code() {
+  // @@protoc_insertion_point(field_mutable_list:tentropy.BlockExecution.code)
   return &code_;
 }
 
+// -------------------------------------------------------------------
+
+// CodeBlock
+
+// required bytes identifier = 1;
+inline bool CodeBlock::has_identifier() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void CodeBlock::set_has_identifier() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void CodeBlock::clear_has_identifier() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void CodeBlock::clear_identifier() {
+  if (identifier_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    identifier_->clear();
+  }
+  clear_has_identifier();
+}
+inline const ::std::string& CodeBlock::identifier() const {
+  // @@protoc_insertion_point(field_get:tentropy.CodeBlock.identifier)
+  return *identifier_;
+}
+inline void CodeBlock::set_identifier(const ::std::string& value) {
+  set_has_identifier();
+  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    identifier_ = new ::std::string;
+  }
+  identifier_->assign(value);
+  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.identifier)
+}
+inline void CodeBlock::set_identifier(const char* value) {
+  set_has_identifier();
+  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    identifier_ = new ::std::string;
+  }
+  identifier_->assign(value);
+  // @@protoc_insertion_point(field_set_char:tentropy.CodeBlock.identifier)
+}
+inline void CodeBlock::set_identifier(const void* value, size_t size) {
+  set_has_identifier();
+  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    identifier_ = new ::std::string;
+  }
+  identifier_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:tentropy.CodeBlock.identifier)
+}
+inline ::std::string* CodeBlock::mutable_identifier() {
+  set_has_identifier();
+  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    identifier_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:tentropy.CodeBlock.identifier)
+  return identifier_;
+}
+inline ::std::string* CodeBlock::release_identifier() {
+  clear_has_identifier();
+  if (identifier_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = identifier_;
+    identifier_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void CodeBlock::set_allocated_identifier(::std::string* identifier) {
+  if (identifier_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete identifier_;
+  }
+  if (identifier) {
+    set_has_identifier();
+    identifier_ = identifier;
+  } else {
+    clear_has_identifier();
+    identifier_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:tentropy.CodeBlock.identifier)
+}
+
+// optional uint64 bytes = 2;
+inline bool CodeBlock::has_bytes() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void CodeBlock::set_has_bytes() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void CodeBlock::clear_has_bytes() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void CodeBlock::clear_bytes() {
+  bytes_ = GOOGLE_ULONGLONG(0);
+  clear_has_bytes();
+}
+inline ::google::protobuf::uint64 CodeBlock::bytes() const {
+  // @@protoc_insertion_point(field_get:tentropy.CodeBlock.bytes)
+  return bytes_;
+}
+inline void CodeBlock::set_bytes(::google::protobuf::uint64 value) {
+  set_has_bytes();
+  bytes_ = value;
+  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.bytes)
+}
+
+// required bytes code = 3;
+inline bool CodeBlock::has_code() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void CodeBlock::set_has_code() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void CodeBlock::clear_has_code() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void CodeBlock::clear_code() {
+  if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    code_->clear();
+  }
+  clear_has_code();
+}
+inline const ::std::string& CodeBlock::code() const {
+  // @@protoc_insertion_point(field_get:tentropy.CodeBlock.code)
+  return *code_;
+}
+inline void CodeBlock::set_code(const ::std::string& value) {
+  set_has_code();
+  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    code_ = new ::std::string;
+  }
+  code_->assign(value);
+  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.code)
+}
+inline void CodeBlock::set_code(const char* value) {
+  set_has_code();
+  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    code_ = new ::std::string;
+  }
+  code_->assign(value);
+  // @@protoc_insertion_point(field_set_char:tentropy.CodeBlock.code)
+}
+inline void CodeBlock::set_code(const void* value, size_t size) {
+  set_has_code();
+  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    code_ = new ::std::string;
+  }
+  code_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:tentropy.CodeBlock.code)
+}
+inline ::std::string* CodeBlock::mutable_code() {
+  set_has_code();
+  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    code_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:tentropy.CodeBlock.code)
+  return code_;
+}
+inline ::std::string* CodeBlock::release_code() {
+  clear_has_code();
+  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = code_;
+    code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void CodeBlock::set_allocated_code(::std::string* code) {
+  if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete code_;
+  }
+  if (code) {
+    set_has_code();
+    code_ = code;
+  } else {
+    clear_has_code();
+    code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:tentropy.CodeBlock.code)
+}
+
+// -------------------------------------------------------------------
+
+// Trace
+
+// optional .tentropy.CodeBlock code = 1;
+inline bool Trace::has_code() const {
+  return contents_case() == kCode;
+}
+inline void Trace::set_has_code() {
+  _oneof_case_[0] = kCode;
+}
+inline void Trace::clear_code() {
+  if (has_code()) {
+    delete contents_.code_;
+    clear_has_contents();
+  }
+}
+inline const ::tentropy::CodeBlock& Trace::code() const {
+  return has_code() ? *contents_.code_
+                      : ::tentropy::CodeBlock::default_instance();
+}
+inline ::tentropy::CodeBlock* Trace::mutable_code() {
+  if (!has_code()) {
+    clear_contents();
+    set_has_code();
+    contents_.code_ = new ::tentropy::CodeBlock;
+  }
+  return contents_.code_;
+}
+inline ::tentropy::CodeBlock* Trace::release_code() {
+  if (has_code()) {
+    clear_has_contents();
+    ::tentropy::CodeBlock* temp = contents_.code_;
+    contents_.code_ = NULL;
+    return temp;
+  } else {
+    return NULL;
+  }
+}
+inline void Trace::set_allocated_code(::tentropy::CodeBlock* code) {
+  clear_contents();
+  if (code) {
+    set_has_code();
+    contents_.code_ = code;
+  }
+}
+
+// optional .tentropy.BlockExecution exectrace = 2;
+inline bool Trace::has_exectrace() const {
+  return contents_case() == kExectrace;
+}
+inline void Trace::set_has_exectrace() {
+  _oneof_case_[0] = kExectrace;
+}
+inline void Trace::clear_exectrace() {
+  if (has_exectrace()) {
+    delete contents_.exectrace_;
+    clear_has_contents();
+  }
+}
+inline const ::tentropy::BlockExecution& Trace::exectrace() const {
+  return has_exectrace() ? *contents_.exectrace_
+                      : ::tentropy::BlockExecution::default_instance();
+}
+inline ::tentropy::BlockExecution* Trace::mutable_exectrace() {
+  if (!has_exectrace()) {
+    clear_contents();
+    set_has_exectrace();
+    contents_.exectrace_ = new ::tentropy::BlockExecution;
+  }
+  return contents_.exectrace_;
+}
+inline ::tentropy::BlockExecution* Trace::release_exectrace() {
+  if (has_exectrace()) {
+    clear_has_contents();
+    ::tentropy::BlockExecution* temp = contents_.exectrace_;
+    contents_.exectrace_ = NULL;
+    return temp;
+  } else {
+    return NULL;
+  }
+}
+inline void Trace::set_allocated_exectrace(::tentropy::BlockExecution* exectrace) {
+  clear_contents();
+  if (exectrace) {
+    set_has_exectrace();
+    contents_.exectrace_ = exectrace;
+  }
+}
+
+inline bool Trace::has_contents() {
+  return contents_case() != CONTENTS_NOT_SET;
+}
+inline void Trace::clear_has_contents() {
+  _oneof_case_[0] = CONTENTS_NOT_SET;
+}
+inline Trace::ContentsCase Trace::contents_case() const {
+  return Trace::ContentsCase(_oneof_case_[0]);
+}
 
 // @@protoc_insertion_point(namespace_scope)
 
