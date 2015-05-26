@@ -740,6 +740,24 @@ type2descr = {
 # 
 #    1. simdint SIMD integer
 
+
+mnem2type['daa'] = ['arith']
+mnem2type['das'] = ['arith']
+mnem2type['aaa'] = ['arith']
+mnem2type['aas'] = ['arith']
+mnem2type['aad'] = ['arith']
+mnem2type['aam'] = ['arith']
+mnem2type['salc'] = ['arith']
+mnem2type['bound'] = mnem2type['test']
+mnem2type['int1'] = ['control']
+mnem2type['int3'] = ['control']
+mnem2type['jmp_far'] = ['control']
+mnem2type['pusha'] = ['datamov']
+mnem2type['les'] = ['datamov']
+mnem2type['lds'] = ['datamov']
+
+
+mnem2type['popa'] = ['datamov']
 def ins2type(mnemonic):
     try:
         return mnem2type[mnemonic]
@@ -751,6 +769,7 @@ def type2desc(type):
     except KeyError:
         return 'unknown type'
 
+print "#include <stdint.h>"
 print "#include \"iclass.h\""
 print "#include <distorm.h>"
 print "#include <string.h>"

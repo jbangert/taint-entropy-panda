@@ -10,7 +10,7 @@ include ../panda.mak
 # If you need custom CFLAGS or LIBS, set them up here
 # CFLAGS+=
 LIBS+= -ldistorm3 -lprotobuf -lcrypto
-QEMU_CXXFLAGS+= -std=c++11 -O0 -ggdb
+QEMU_CXXFLAGS+= -std=c++11 -O3 -ggdb
 
 # This will make things easier.
 $(PLUGIN_OBJ_DIR)/%.o: $(wildcard *.h) $(wildcard $(SRC_PATH)/panda/*.h)
