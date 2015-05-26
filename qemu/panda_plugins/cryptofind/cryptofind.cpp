@@ -244,8 +244,8 @@ bool before_block_exec_invalidate(CPUState *env, TranslationBlock *tb){
       panda_disable_memcb();
       #else
       end = tb->pc;
-      trace_cryptoblock();
       #endif
+      trace_cryptoblock();
       //fsync(f_memtrace);
       tracing = false;
     } else {
