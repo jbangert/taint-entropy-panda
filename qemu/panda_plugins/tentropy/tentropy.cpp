@@ -92,6 +92,7 @@ int after_block_translate(CPUState *env, TranslationBlock *tb){
 }
 void tentropy_oncall(CPUState *env, target_ulong func){
   target_phys_addr_t physaddr = panda_virt_to_phys(env,func);
+  static uint64_t label = 10;
   if(interesting_funcs.count(physaddr)>0){
     printf("Function %llX with taint called \n", (long long unsigned)func);
     if(taint_source == taint_FreeBSD){
@@ -103,7 +104,7 @@ void tentropy_oncall(CPUState *env, target_ulong func){
       assert(size<32);
       for(;size;size--){
         printf("Tainting %" PRIu64 "\n",pa_begin+size);
-        taint2_label_ram(pa_begin+size , 10); //TODO: generate unique label
+        taint2_label_ram(pa_begin+size , label++); //TODO: generate unique label
       }
       #endif
     }

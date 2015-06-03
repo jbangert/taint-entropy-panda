@@ -14,6 +14,8 @@ message BlockExecution {
 message CodeBlock {
         required uint64 identifier  = 1; // SHA hash?
         required bytes code = 3;      //
+        optional uint64 total_instr = 4;
+        optional uint64 bitwise_instr = 5;
 }
 message Trace {
         oneof contents {

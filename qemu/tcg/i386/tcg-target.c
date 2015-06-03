@@ -1193,7 +1193,7 @@ static void tcg_out_qemu_ld_direct(TCGContext *s, int datalo, int datahi,
     }                                                                   \
 }                                                                       \
 static void REGPARM panda_user_read_ ## size(target_ulong addr){        \
-    uint64_t val = *(uint##size##_t*)g2h(addr);                         \
+    uint##size##_t val = *(uint##size##_t*)g2h(addr);                         \
     panda_cb_list *plist;                                               \
     for(plist = panda_cbs[PANDA_CB_VIRT_MEM_READ]; plist != NULL;       \
         plist = panda_cb_list_next(plist)) {                            \
