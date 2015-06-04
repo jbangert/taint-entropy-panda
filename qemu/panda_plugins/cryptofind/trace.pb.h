@@ -336,12 +336,30 @@ class CodeBlock : public ::google::protobuf::Message {
   inline ::std::string* release_code();
   inline void set_allocated_code(::std::string* code);
 
+  // optional uint64 total_instr = 4;
+  inline bool has_total_instr() const;
+  inline void clear_total_instr();
+  static const int kTotalInstrFieldNumber = 4;
+  inline ::google::protobuf::uint64 total_instr() const;
+  inline void set_total_instr(::google::protobuf::uint64 value);
+
+  // optional uint64 bitwise_instr = 5;
+  inline bool has_bitwise_instr() const;
+  inline void clear_bitwise_instr();
+  static const int kBitwiseInstrFieldNumber = 5;
+  inline ::google::protobuf::uint64 bitwise_instr() const;
+  inline void set_bitwise_instr(::google::protobuf::uint64 value);
+
   // @@protoc_insertion_point(class_scope:tentropy.CodeBlock)
  private:
   inline void set_has_identifier();
   inline void clear_has_identifier();
   inline void set_has_code();
   inline void clear_has_code();
+  inline void set_has_total_instr();
+  inline void clear_has_total_instr();
+  inline void set_has_bitwise_instr();
+  inline void clear_has_bitwise_instr();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -349,6 +367,8 @@ class CodeBlock : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::google::protobuf::uint64 identifier_;
   ::std::string* code_;
+  ::google::protobuf::uint64 total_instr_;
+  ::google::protobuf::uint64 bitwise_instr_;
   friend void  protobuf_AddDesc_trace_2eproto();
   friend void protobuf_AssignDesc_trace_2eproto();
   friend void protobuf_ShutdownFile_trace_2eproto();
@@ -813,6 +833,54 @@ inline void CodeBlock::set_allocated_code(::std::string* code) {
     code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:tentropy.CodeBlock.code)
+}
+
+// optional uint64 total_instr = 4;
+inline bool CodeBlock::has_total_instr() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void CodeBlock::set_has_total_instr() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void CodeBlock::clear_has_total_instr() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void CodeBlock::clear_total_instr() {
+  total_instr_ = GOOGLE_ULONGLONG(0);
+  clear_has_total_instr();
+}
+inline ::google::protobuf::uint64 CodeBlock::total_instr() const {
+  // @@protoc_insertion_point(field_get:tentropy.CodeBlock.total_instr)
+  return total_instr_;
+}
+inline void CodeBlock::set_total_instr(::google::protobuf::uint64 value) {
+  set_has_total_instr();
+  total_instr_ = value;
+  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.total_instr)
+}
+
+// optional uint64 bitwise_instr = 5;
+inline bool CodeBlock::has_bitwise_instr() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void CodeBlock::set_has_bitwise_instr() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void CodeBlock::clear_has_bitwise_instr() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void CodeBlock::clear_bitwise_instr() {
+  bitwise_instr_ = GOOGLE_ULONGLONG(0);
+  clear_has_bitwise_instr();
+}
+inline ::google::protobuf::uint64 CodeBlock::bitwise_instr() const {
+  // @@protoc_insertion_point(field_get:tentropy.CodeBlock.bitwise_instr)
+  return bitwise_instr_;
+}
+inline void CodeBlock::set_bitwise_instr(::google::protobuf::uint64 value) {
+  set_has_bitwise_instr();
+  bitwise_instr_ = value;
+  // @@protoc_insertion_point(field_set:tentropy.CodeBlock.bitwise_instr)
 }
 
 // -------------------------------------------------------------------

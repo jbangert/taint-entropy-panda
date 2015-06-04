@@ -86,7 +86,6 @@ uint32_t taint2_num_labels_applied(void);
 void taint2_track_taint_state(void);
 
 }
-#ifndef CONFIG_USER_ONLY
 #include <llvm/PassManager.h>
 #include <llvm/PassRegistry.h>
 #include <llvm/Analysis/Verifier.h>
@@ -164,8 +163,11 @@ static TaintGranularity granularity;
 static TaintLabelMode mode;
 bool optimize_llvm = true;
 extern bool inline_taint;
-
-
+#ifndef CONFIG_SOFTMMU
+static target_ulong panda_virt_to_phys(CPUState *env,target_ulong addr){
+  return addr;
+}
+#endif
 /*
  * These memory callbacks are only for whole-system mode.  User-mode memory
  * accesses are captured by IR instrumentation.
@@ -893,4 +895,3 @@ void uninit_plugin(void *self) {
     panda_enable_tb_chaining();
 
 }
-#endif

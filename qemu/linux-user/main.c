@@ -56,6 +56,8 @@
 
 #include "panda_plugin.h"
 
+int pandalog = 0;
+
 char *exec_path;
 
 int singlestep;

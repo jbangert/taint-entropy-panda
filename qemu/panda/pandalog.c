@@ -4,7 +4,6 @@
 #include "rr_log.h"
 #endif
 
-#ifndef CONFIG_USER_ONLY
 #include "pandalog.pb-c.h"
 #include "pandalog.h"
 #include <zlib.h>
@@ -52,7 +51,8 @@ extern int panda_in_main_loop;
 void pandalog_write_entry(Panda__LogEntry *entry) {
     // fill in required fields. 
     // NOTE: any other fields will already have been filled in 
-    // by the plugin that made this call.  
+    // by the plugin that made this call.
+#ifdef CONFIG_SOFTMMU
     if (panda_in_main_loop) {
         entry->pc = panda_current_pc(cpu_single_env);
         entry->instr = rr_get_guest_instr_count ();
@@ -61,6 +61,10 @@ void pandalog_write_entry(Panda__LogEntry *entry) {
         entry->pc = -1;
         entry->instr = -1;
     }
+#else 
+        entry->pc = -1;
+        entry->instr = -1;
+#endif
     size_t n = panda__log_entry__get_packed_size(entry);   
     resize_pandalog(n);
     panda__log_entry__pack(entry, pandalog_buf);
@@ -91,5 +95,3 @@ void pandalog_free_entry(Panda__LogEntry *entry) {
 }
 
 
-
-#endif

@@ -82,9 +82,11 @@ void protobuf_AssignDesc_trace_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BlockExecution_MemAccess));
   CodeBlock_descriptor_ = file->message_type(1);
-  static const int CodeBlock_offsets_[2] = {
+  static const int CodeBlock_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CodeBlock, identifier_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CodeBlock, code_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CodeBlock, total_instr_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CodeBlock, bitwise_instr_),
   };
   CodeBlock_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -164,11 +166,12 @@ void protobuf_AddDesc_trace_2eproto() {
     "\003 \003(\0132\".tentropy.BlockExecution.MemAcces"
     "s\0220\n\004read\030\004 \003(\0132\".tentropy.BlockExecutio"
     "n.MemAccess\022\014\n\004exec\030\005 \003(\004\032\'\n\tMemAccess\022\014"
-    "\n\004addr\030\001 \002(\004\022\014\n\004data\030\002 \002(\014\"-\n\tCodeBlock\022"
-    "\022\n\nidentifier\030\001 \002(\004\022\014\n\004code\030\003 \002(\014\"g\n\005Tra"
-    "ce\022#\n\004code\030\001 \001(\0132\023.tentropy.CodeBlockH\000\022"
-    "-\n\texectrace\030\002 \001(\0132\030.tentropy.BlockExecu"
-    "tionH\000B\n\n\010contents", 378);
+    "\n\004addr\030\001 \002(\004\022\014\n\004data\030\002 \002(\014\"Y\n\tCodeBlock\022"
+    "\022\n\nidentifier\030\001 \002(\004\022\014\n\004code\030\003 \002(\014\022\023\n\013tot"
+    "al_instr\030\004 \001(\004\022\025\n\rbitwise_instr\030\005 \001(\004\"g\n"
+    "\005Trace\022#\n\004code\030\001 \001(\0132\023.tentropy.CodeBloc"
+    "kH\000\022-\n\texectrace\030\002 \001(\0132\030.tentropy.BlockE"
+    "xecutionH\000B\n\n\010contents", 422);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "trace.proto", &protobuf_RegisterTypes);
   BlockExecution::default_instance_ = new BlockExecution();
@@ -868,6 +871,8 @@ void BlockExecution::Swap(BlockExecution* other) {
 #ifndef _MSC_VER
 const int CodeBlock::kIdentifierFieldNumber;
 const int CodeBlock::kCodeFieldNumber;
+const int CodeBlock::kTotalInstrFieldNumber;
+const int CodeBlock::kBitwiseInstrFieldNumber;
 #endif  // !_MSC_VER
 
 CodeBlock::CodeBlock()
@@ -891,6 +896,8 @@ void CodeBlock::SharedCtor() {
   _cached_size_ = 0;
   identifier_ = GOOGLE_ULONGLONG(0);
   code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  total_instr_ = GOOGLE_ULONGLONG(0);
+  bitwise_instr_ = GOOGLE_ULONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -929,7 +936,18 @@ CodeBlock* CodeBlock::New() const {
 }
 
 void CodeBlock::Clear() {
-  if (_has_bits_[0 / 32] & 3) {
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<CodeBlock*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 15) {
+    ZR_(total_instr_, bitwise_instr_);
     identifier_ = GOOGLE_ULONGLONG(0);
     if (has_code()) {
       if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -937,6 +955,10 @@ void CodeBlock::Clear() {
       }
     }
   }
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -971,6 +993,36 @@ bool CodeBlock::MergePartialFromCodedStream(
          parse_code:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_code()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(32)) goto parse_total_instr;
+        break;
+      }
+
+      // optional uint64 total_instr = 4;
+      case 4: {
+        if (tag == 32) {
+         parse_total_instr:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &total_instr_)));
+          set_has_total_instr();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(40)) goto parse_bitwise_instr;
+        break;
+      }
+
+      // optional uint64 bitwise_instr = 5;
+      case 5: {
+        if (tag == 40) {
+         parse_bitwise_instr:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &bitwise_instr_)));
+          set_has_bitwise_instr();
         } else {
           goto handle_unusual;
         }
@@ -1014,6 +1066,16 @@ void CodeBlock::SerializeWithCachedSizes(
       3, this->code(), output);
   }
 
+  // optional uint64 total_instr = 4;
+  if (has_total_instr()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(4, this->total_instr(), output);
+  }
+
+  // optional uint64 bitwise_instr = 5;
+  if (has_bitwise_instr()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(5, this->bitwise_instr(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1034,6 +1096,16 @@ void CodeBlock::SerializeWithCachedSizes(
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
         3, this->code(), target);
+  }
+
+  // optional uint64 total_instr = 4;
+  if (has_total_instr()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(4, this->total_instr(), target);
+  }
+
+  // optional uint64 bitwise_instr = 5;
+  if (has_bitwise_instr()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(5, this->bitwise_instr(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1060,6 +1132,20 @@ int CodeBlock::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->code());
+    }
+
+    // optional uint64 total_instr = 4;
+    if (has_total_instr()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->total_instr());
+    }
+
+    // optional uint64 bitwise_instr = 5;
+    if (has_bitwise_instr()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->bitwise_instr());
     }
 
   }
@@ -1095,6 +1181,12 @@ void CodeBlock::MergeFrom(const CodeBlock& from) {
     if (from.has_code()) {
       set_code(from.code());
     }
+    if (from.has_total_instr()) {
+      set_total_instr(from.total_instr());
+    }
+    if (from.has_bitwise_instr()) {
+      set_bitwise_instr(from.bitwise_instr());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1121,6 +1213,8 @@ void CodeBlock::Swap(CodeBlock* other) {
   if (other != this) {
     std::swap(identifier_, other->identifier_);
     std::swap(code_, other->code_);
+    std::swap(total_instr_, other->total_instr_);
+    std::swap(bitwise_instr_, other->bitwise_instr_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
