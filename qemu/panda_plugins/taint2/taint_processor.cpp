@@ -18,6 +18,7 @@ PANDAENDCOMMENT */
 
 #include <stdio.h>
 
+#include "panda_plugin.h"
 #include "panda_plugin_plugin.h"
 #include "panda_memlog.h"
 #include "guestarch.h"

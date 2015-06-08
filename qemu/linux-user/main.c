@@ -73,6 +73,9 @@ int have_guest_base;
 unsigned long reserved_va;
 #endif
 
+#ifdef PANDA_LIMIT_MMAP
+target_ulong ram_size = 1ul<<34;
+#endif
 static void usage(void);
 
 static const char *interp_prefix = CONFIG_QEMU_INTERP_PREFIX;
@@ -3126,9 +3129,34 @@ static void handle_generate_llvm(const char *arg)
 
 static void handle_panda_plugin(const char *arg)
 {
-        if(!panda_load_plugin(arg))
-          if(!panda_load_plugin(panda_plugin_path(arg)))
-            fprintf(stderr, "WARN: Unable to load plugin `%s'\n", optarg);
+  char *new_optarg = strdup(arg);
+  if(!new_optarg)
+    return;
+  char *plugin_start = new_optarg;
+  char *opt_list;
+  if ((opt_list = strchr(plugin_start, ':'))) {
+    char arg_str[255];
+    *opt_list = '\0';
+    opt_list++;
+    
+    char *opt_start = opt_list, *opt_end = opt_list;
+    while (opt_end != NULL) {
+      opt_end = strchr(opt_start, ',');
+      if (opt_end != NULL) *opt_end = '\0';
+      
+      snprintf(arg_str, 255, "%s:%s", plugin_start, opt_start);
+      if (panda_add_arg(arg_str, strlen(arg_str))) // copies arg
+        printf("Adding PANDA arg %s.\n", arg_str);
+      else
+        fprintf(stderr, "WARN: Couldn't add PANDA arg '%s': argument too long,\n", arg_str);
+      
+      opt_start = opt_end + 1;
+    }
+  }
+
+  if(!panda_load_plugin(plugin_start))
+    if(!panda_load_plugin(panda_plugin_path(plugin_start)))
+      fprintf(stderr, "WARN: Unable to load plugin `%s'\n", plugin_start);
 }
 
 struct qemu_argument {

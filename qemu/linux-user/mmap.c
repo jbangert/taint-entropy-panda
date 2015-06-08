@@ -30,7 +30,7 @@
 
 #include "qemu.h"
 #include "qemu-common.h"
-
+#include "panda_plugin.h"
 //#define DEBUG_MMAP
 
 #if defined(CONFIG_USE_NPTL)
@@ -205,7 +205,7 @@ static int mmap_frag(abi_ulong real_start,
 }
 
 #if HOST_LONG_BITS == 64 && TARGET_ABI_BITS == 64
-# define TASK_UNMAPPED_BASE  (1ul << 38)
+# define TASK_UNMAPPED_BASE  (1ul << 33)
 #elif defined(__CYGWIN__)
 /* Cygwin doesn't have a whole lot of address space.  */
 # define TASK_UNMAPPED_BASE  0x18000000
@@ -298,9 +298,14 @@ abi_ulong mmap_find_vma(abi_ulong start, abi_ulong size)
         if (ptr == MAP_FAILED) {
             return (abi_ulong)-1;
         }
-
-        /* Count the number of sequential returns of the same address.
-           This is used to modify the search algorithm below.  */
+        #ifdef PANDA_LIMIT_MMAP
+        if(ptr >= ram_size){
+            munmap(ptr, size);
+            return (abi_ulong)-1;
+        }
+        #endif
+           /* Count the number of sequential returns of the same address.
+              This is used to modify the search algorithm below.  */
         repeat = (ptr == prev ? repeat + 1 : 0);
 
         if (h2g_valid(ptr + size - 1)) {

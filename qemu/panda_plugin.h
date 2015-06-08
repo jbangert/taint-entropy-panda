@@ -599,4 +599,10 @@ char** str_split(char* a_str, const char a_delim);
 char *panda_plugin_path(const char *name);
 void panda_require(const char *plugin_name);
 
+
+
+#ifndef CONFIG_SOFTMMU
+#define PANDA_LIMIT_MMAP
+  extern target_ulong ram_size;
+#endif
 #endif

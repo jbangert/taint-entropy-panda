@@ -41,7 +41,7 @@ extern "C" {
 #include "../common/prog_point.h"
 #include "../callstack_instr/callstack_instr_ext.h"
 #include "panda_plugin_plugin.h"
-#ifdef CONFIG_SOFTMMU
+//#ifdef CONFIG_SOFTMMU
 // These need to be extern "C" so that the ABI is compatible with
 // QEMU/PANDA, which is written in C
 extern "C" {
@@ -105,8 +105,12 @@ int mem_callback(CPUState *env, target_ulong pc, target_ulong addr,
 
             if (sp.val[str_idx] == strlens[str_idx]) {
                 // Victory!
+                uint64_t instrcount = 0; 
+                #ifdef CONFIG_SOFTMMU
+                instrcount = rr_get_guest_instr_count();
+                #endif
                 printf("%s Match of str %d at: instr_count=%lu :  " TARGET_FMT_lx " " TARGET_FMT_lx " " TARGET_FMT_lx "\n",
-                       (is_write ? "WRITE" : "READ"), str_idx, rr_get_guest_instr_count(), p.caller, p.pc, p.cr3);
+                       (is_write ? "WRITE" : "READ"), str_idx, instrcount, p.caller, p.pc, p.cr3);
                 matches[p].val[str_idx]++;
                 sp.val[str_idx] = 0;
 
@@ -248,4 +252,4 @@ void uninit_plugin(void *self) {
     }
     fclose(mem_report);
 }
-#endif
+//#endif
