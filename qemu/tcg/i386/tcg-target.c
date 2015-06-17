@@ -1181,14 +1181,14 @@ static void tcg_out_qemu_ld_direct(TCGContext *s, int datalo, int datahi,
 #ifndef CONFIG_SOFTMMU
 
 #include "panda_plugin.h"
-
+extern CPUState *env;
 #define CB(size)                                                        \
     static void REGPARM panda_user_write_ ## size(target_ulong addr){   \
     panda_cb_list *plist;                                               \
     uint64_t val = *(uint##size##_t*)g2h(addr);                         \
     for(plist = panda_cbs[PANDA_CB_VIRT_MEM_WRITE]; plist != NULL;      \
         plist = panda_cb_list_next(plist)) {                            \
-        plist->entry.virt_mem_write(NULL, 0, addr,                      \
+        plist->entry.virt_mem_write(env, 0, addr,                      \
                                     size/8, &val);                      \
     }                                                                   \
 }                                                                       \
@@ -1197,7 +1197,7 @@ static void REGPARM panda_user_read_ ## size(target_ulong addr){        \
     panda_cb_list *plist;                                               \
     for(plist = panda_cbs[PANDA_CB_VIRT_MEM_READ]; plist != NULL;       \
         plist = panda_cb_list_next(plist)) {                            \
-        plist->entry.virt_mem_read(NULL, 0, addr,                       \
+        plist->entry.virt_mem_read(env, 0, addr,                       \
                                    sizeof val, &val);                   \
     }                                                                   \
 }

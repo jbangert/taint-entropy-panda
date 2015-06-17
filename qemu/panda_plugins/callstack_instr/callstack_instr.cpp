@@ -405,7 +405,10 @@ int get_functions(target_ulong functions[], int n, CPUState *env) {
 }
 
 void get_prog_point(CPUState *env, prog_point *p) {
-    if (!p) return;
+#ifndef CONFIG_SOFTMMU
+    return;
+    #endif
+    if (!p ) return;
 
     // Get address space identifier
     target_ulong asid = get_asid(env, env->panda_guest_pc);
