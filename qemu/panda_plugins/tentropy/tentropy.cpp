@@ -211,7 +211,7 @@ bool init_plugin(void *self) {
   
     
   assert(init_taint2_api());
-
+    taint2_enable_taint();
   PPP_REG_CB("syscalls2", on_sys_open_return, tentropy_open);
   PPP_REG_CB("syscalls2", on_sys_read_return, tentropy_read);
   PPP_REG_CB("syscalls2", on_sys_close_return, tentropy_close);
