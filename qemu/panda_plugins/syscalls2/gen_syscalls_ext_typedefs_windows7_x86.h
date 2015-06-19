@@ -1,4 +1,4 @@
-#ifdef TARGET_I386
+#if defined(TARGET_I386) && !defined(TARGET_X86_64)
 typedef void (*on_NtReplaceKey_enter_t)(CPUState* env,target_ulong pc,uint32_t ObjectAttributes,uint32_t Key,uint32_t ReplacedObjectAttributes);
 typedef void (*on_NtCreateUserProcess_return_t)(CPUState* env,target_ulong pc,uint32_t ProcessHandle,uint32_t ThreadHandle,uint32_t ProcessDesiredAccess,uint32_t ThreadDesiredAccess,uint32_t ProcessObjectAttributes,uint32_t ThreadObjectAttributes,uint32_t ProcessFlags,uint32_t ThreadFlags,uint32_t ProcessParameters,uint32_t CreateInfo,uint32_t AttributeList);
 typedef void (*on_NtAllocateVirtualMemory_enter_t)(CPUState* env,target_ulong pc,uint32_t ProcessHandle,target_ulong BaseAddress,uint32_t ZeroBits,uint32_t RegionSize,uint32_t AllocationType,uint32_t Protect);

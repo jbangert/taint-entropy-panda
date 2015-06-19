@@ -45,7 +45,7 @@ void registerExecPreCallback(void (*callback)(CPUState*, target_ulong));
 
 }
 
-enum ProfileType { PROFILE_LINUX_X86, PROFILE_LINUX_ARM, PROFILE_WINDOWS7_X86, PROFILE_LAST} ;
+enum ProfileType { PROFILE_LINUX_X86, PROFILE_LINUX_ARM, PROFILE_WINDOWS7_X86, PROFILE_LINUX_X64, PROFILE_LAST} ;
 
 ProfileType syscalls_profile;
 
@@ -87,6 +87,15 @@ target_ulong calc_retaddr_linux_x86(CPUState* env, target_ulong pc) {
 #endif
 }
 
+target_ulong calc_retaddr_linux_x64(CPUState* env, target_ulong pc) {
+#if defined(TARGET_X86_64)
+    return pc+2; //XXX: Not sure if this works. Address of pc+ len (syscall), why 11 on 32 bit?
+#else
+    // shouldn't happen
+    assert (1==0);
+#endif
+}
+
 target_ulong calc_retaddr_linux_arm(CPUState* env, target_ulong pc) {
 #if defined(TARGET_ARM)
     // Normal syscalls: return addr is stored in LR
@@ -111,6 +120,9 @@ target_ulong calc_retaddr(CPUState* env, target_ulong pc){
     switch (syscalls_profile) {
     case PROFILE_LINUX_X86:
         return calc_retaddr_linux_x86(env, pc);
+        break;
+    case PROFILE_LINUX_X64:
+        return calc_retaddr_linux_x64(env, pc);
         break;
     case PROFILE_LINUX_ARM:
         return calc_retaddr_linux_arm(env, pc);
@@ -153,6 +165,34 @@ uint32_t get_linux_x86_argnum(CPUState *env, uint32_t argnum) {
     return 0;
 }
 
+// Argument getting (at syscall entry)
+uint64_t get_linux_x64_argnum(CPUState *env, uint32_t argnum) {
+#if defined(TARGET_X86_64)
+    switch (argnum) {
+    case 0: 
+        return env->regs[R_EDI];
+        break;
+    case 1:
+        return env->regs[R_ESI];
+        break;
+    case 2:
+        return env->regs[R_EDX];
+        break;
+    case 3:
+        return env->regs[10];
+        break;
+    case 4:
+        return env->regs[8];
+        break;
+    case 5:
+        return env->regs[9];
+        break;
+    }
+    assert (1==0);
+#endif
+    return 0;
+}
+
 static uint32_t get_win_syscall_arg(CPUState* env, int nr) {
 #if defined(TARGET_I386)
     // At sysenter on Windows7, args start at EDX+8
@@ -172,6 +212,10 @@ target_ulong get_32 (CPUState *env, uint32_t argnum) {
         assert (argnum < 6);
         ret = (target_ulong) get_linux_x86_argnum(env, argnum);
         break;
+    case PROFILE_LINUX_X64:
+        assert (argnum < 6);
+        ret = (target_ulong) get_linux_x64_argnum(env, argnum);
+        break;
     case PROFILE_LINUX_ARM:
         assert (argnum < 7);
         ret =  (target_ulong) env->regs[argnum];
@@ -185,20 +229,16 @@ target_ulong get_32 (CPUState *env, uint32_t argnum) {
     return ret;
 }
 
-uint32_t get_pointer(CPUState *env, uint32_t argnum) {
-    return get_32(env, argnum);
-}
-
-int32_t get_s32(CPUState *env, uint32_t argnum) {
-    return (int32_t) get_32(env, argnum);
-}
-
 uint64_t get_64(CPUState *env, uint32_t argnum) {
     uint64_t ret;
     switch (syscalls_profile) {
     case PROFILE_LINUX_X86:
         assert (argnum < 6);
         ret = (((uint64_t) get_linux_x86_argnum(env, argnum)) << 32) | (get_linux_x86_argnum(env, argnum));
+        break;
+    case PROFILE_LINUX_X64:
+        assert (argnum < 6);
+        ret = (target_ulong) get_linux_x64_argnum(env, argnum);
         break;
     case PROFILE_LINUX_ARM:
         assert (argnum < 7);
@@ -211,6 +251,23 @@ uint64_t get_64(CPUState *env, uint32_t argnum) {
         assert (1==0);
     }
     return ret;
+}
+
+target_ulong get_pointer(CPUState *env, uint32_t argnum) {
+    switch(syscalls_profile){
+    case PROFILE_LINUX_X86:
+    case PROFILE_WINDOWS7_X86:
+    case PROFILE_LINUX_ARM:
+        return get_32(env, argnum);
+    case PROFILE_LINUX_X64:
+        return get_64(env, argnum);
+    default:
+        assert(1==0);
+    }
+}
+
+int32_t get_s32(CPUState *env, uint32_t argnum) {
+    return (int32_t) get_32(env, argnum);
 }
 
 // Argument getting (at syscall return)
@@ -233,6 +290,10 @@ target_ulong get_return_32 (CPUState *env, uint32_t argnum) {
         assert (argnum < 6);
         ret = (target_ulong) get_linux_x86_argnum(env, argnum);
         break;
+    case PROFILE_LINUX_X64:
+        assert (argnum < 6);
+        ret = (target_ulong) get_linux_x64_argnum(env, argnum);
+        break;
     case PROFILE_LINUX_ARM:
         assert (argnum < 7);
         ret =  (target_ulong) env->regs[argnum];
@@ -246,7 +307,7 @@ target_ulong get_return_32 (CPUState *env, uint32_t argnum) {
     return ret;
 }
 
-uint32_t get_return_pointer(CPUState *env, uint32_t argnum) {
+target_ulong get_return_pointer(CPUState *env, uint32_t argnum) {
     return get_return_32(env, argnum);
 }
 
@@ -260,6 +321,10 @@ uint64_t get_return_64(CPUState *env, uint32_t argnum) {
     case PROFILE_LINUX_X86:
         assert (argnum < 6);
         ret = (((uint64_t) get_linux_x86_argnum(env, argnum)) << 32) | (get_linux_x86_argnum(env, argnum));
+        break;
+    case PROFILE_LINUX_X64:
+        assert (argnum < 6);
+        ret = get_linux_x64_argnum(env, argnum);
         break;
     case PROFILE_LINUX_ARM:
         assert (argnum < 7);
@@ -298,6 +363,9 @@ static int returned_check_callback(CPUState *env, TranslationBlock* tb){
         case PROFILE_LINUX_X86:
             syscall_return_switch_linux_x86(env, tb->pc, retVal.ordinal);
             break;
+        case PROFILE_LINUX_X64:
+            syscall_return_switch_linux_x64(env, tb->pc, retVal.ordinal);
+            break;
         case PROFILE_LINUX_ARM:
             syscall_return_switch_linux_arm(env, tb->pc, retVal.ordinal);
             break;
@@ -318,34 +386,7 @@ static int returned_check_callback(CPUState *env, TranslationBlock* tb){
     return false;
 }
 
-
-// This will only be called for instructions where the
-// translate_callback returned true
-int exec_callback(CPUState *env, target_ulong pc) {
-    // run any code we need to update our state
-    for(const auto callback : preExecCallbacks){
-        callback(env, pc);
-    }    
-    switch (syscalls_profile) {
-    case PROFILE_LINUX_X86:
-        syscall_enter_switch_linux_x86(env, pc);
-        break;
-    case PROFILE_LINUX_ARM:
-        syscall_enter_switch_linux_arm(env, pc);
-        break;
-    case PROFILE_WINDOWS7_X86:
-        syscall_enter_switch_windows7_x86(env, pc);
-        break;
-    default:
-        assert (1==0);
-    }
-    return 0;
-}
-
-
-
-// Check if the instruction is sysenter (0F 34)
-bool translate_callback(CPUState *env, target_ulong pc) {
+bool is_syscall(CPUState  *env, target_ulong pc){
 #if defined(TARGET_I386)
     unsigned char buf[2] = {};
     panda_virtual_memory_rw(env, pc, buf, 2, 0);
@@ -386,6 +427,40 @@ bool translate_callback(CPUState *env, target_ulong pc) {
     return false;
 #endif
 }
+// This will only be called for instructions where the
+// translate_callback returned true
+int exec_callback(CPUState *env, target_ulong pc) {
+    if(!is_syscall(env,pc))
+        return true;
+    // run any code we need to update our state
+    for(const auto callback : preExecCallbacks){
+        callback(env, pc);
+    }    
+    switch (syscalls_profile) {
+    case PROFILE_LINUX_X86:
+        syscall_enter_switch_linux_x86(env, pc);
+        break;
+    case PROFILE_LINUX_X64:
+        syscall_enter_switch_linux_x64(env, pc);
+        break;
+    case PROFILE_LINUX_ARM:
+        syscall_enter_switch_linux_arm(env, pc);
+        break;
+    case PROFILE_WINDOWS7_X86:
+        syscall_enter_switch_windows7_x86(env, pc);
+        break;
+    default:
+        assert (1==0);
+    }
+    return 0;
+}
+
+
+
+// Check if the instruction is sysenter (0F 34)
+bool translate_callback(CPUState *env, target_ulong pc) {
+    return is_syscall(env, pc);
+}
 
 
 extern "C" {
@@ -397,15 +472,27 @@ bool init_plugin(void *self) {
     printf("Initializing plugin syscalls2\n");
 
     args = panda_get_args("syscalls");
-    const char *profile_name = panda_parse_string(args, "profile", "linux_x86");
+    const char *profile_name = panda_parse_string(args, "profile", "default");
+
+    //XXX: add some default? 
     if (0 == strncmp(profile_name, "linux_x86", 8)) {
         syscalls_profile = PROFILE_LINUX_X86;
+    }
+    else if (0 == strncmp(profile_name, "linux_x64", 8)) {
+        syscalls_profile = PROFILE_LINUX_X64;
     }
     else if (0 == strncmp(profile_name, "linux_arm", 8)) {
         syscalls_profile = PROFILE_LINUX_ARM;
     }
     else if (0 == strncmp(profile_name, "windows7_x86", 8)) {
         syscalls_profile = PROFILE_WINDOWS7_X86;
+    }
+    else if (0 == strncmp(profile_name, "default", 8)) {
+        #ifdef TARGET_X86_64
+        syscalls_profile = PROFILE_LINUX_X64;
+        #else
+        #error 'add a default target'
+        #endif
     }
     else {
         printf ("Unrecognized profile %s\n", profile_name);

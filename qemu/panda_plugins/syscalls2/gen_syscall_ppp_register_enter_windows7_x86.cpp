@@ -1,4 +1,4 @@
-#ifdef TARGET_I386
+#if defined(TARGET_I386) && !defined(TARGET_X86_64)
 PPP_PROT_REG_CB(on_NtQueryEaFile_enter)
 PPP_PROT_REG_CB(on_NtAddAtom_enter)
 PPP_PROT_REG_CB(on_NtSetValueKey_enter)

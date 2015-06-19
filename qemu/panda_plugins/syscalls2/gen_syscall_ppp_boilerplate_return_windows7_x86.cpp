@@ -1,4 +1,4 @@
-#ifdef TARGET_I386
+#if defined(TARGET_I386) && !defined(TARGET_X86_64)
 PPP_CB_BOILERPLATE(on_NtSetIntervalProfile_return)
 PPP_CB_BOILERPLATE(on_NtOpenDirectoryObject_return)
 PPP_CB_BOILERPLATE(on_NtSetInformationFile_return)

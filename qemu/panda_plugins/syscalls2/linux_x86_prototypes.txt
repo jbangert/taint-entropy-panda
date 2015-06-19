@@ -43,7 +43,7 @@
 48 long sys_signal(int sig, __sighandler_t handler);
 49 long sys_geteuid16(void);
 50 long sys_getegid16(void);
-51 long sys_acct(const char __user *name);
+o51 long sys_acct(const char __user *name);
 52 long sys_umount(char __user *name, int flags);
 54 long sys_ioctl(unsigned int fd, unsigned int cmd,unsigned long arg);
 55 long sys_fcntl(unsigned int fd, unsigned int cmd, unsigned long arg);

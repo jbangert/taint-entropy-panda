@@ -16,7 +16,7 @@ extern "C" {
 #include "gen_syscall_ppp_boilerplate_return_windows7_x86.cpp" // osarch
 
 void syscall_return_switch_windows7_x86 ( CPUState *env, target_ulong pc, target_ulong ordinal) {  // osarch
-#ifdef TARGET_I386                                          // GUARD
+#if defined(TARGET_I386) && !defined(TARGET_X86_64)                                          // GUARD
     switch( ordinal ) {                          // CALLNO
 // 0 NTSTATUS NtAcceptConnectPort ['PHANDLE PortHandle', ' PVOID PortContext', ' PPORT_MESSAGE ConnectionRequest', ' BOOLEAN AcceptConnection', ' PPORT_VIEW ServerView', ' PREMOTE_PORT_VIEW ClientView']
 case 0: {

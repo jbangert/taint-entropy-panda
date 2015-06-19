@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python2
 # /* PANDABEGINCOMMENT
 # * 
 # * Authors:
@@ -48,7 +48,7 @@ ARCH=argv[2]
 if not (OS == 'windows7' or OS == 'linux'):
     usage()
 
-if not (ARCH == 'arm' or ARCH == 'x86'):
+if not (ARCH == 'arm' or ARCH == 'x86' or ARCH=='x64'):
     usage()
 
 print "os is [%s] arch is [%s]" % (OS, ARCH)
@@ -56,12 +56,16 @@ print "os is [%s] arch is [%s]" % (OS, ARCH)
 if ARCH=="x86":
     CALLNO="EAX"
     SP = "ESP" 
-    GUARD = "#ifdef TARGET_I386" 
+    GUARD = "#if defined(TARGET_I386) && !defined(TARGET_X86_64)" 
 
 if ARCH=="arm":
     CALLNO = "env->regs[7]"
     SP = "env->regs[13]"
     GUARD = "#ifdef TARGET_ARM"
+if ARCH =="x64":
+    CALLNO = "EAX"
+    SP = "ESP"
+    GUARD = "#ifdef TARGET_X86_64"
 
    
 ARGS = ["arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8", "arg9", "arg10", "arg11", "arg12", "arg13", "arg14", "arg15"]

@@ -1,4 +1,4 @@
-#ifdef TARGET_I386
+#if defined(TARGET_I386) && !defined(TARGET_X86_64)
 PPP_PROT_REG_CB(on_sys_setpgid_return)
 PPP_PROT_REG_CB(on_sys_truncate_return)
 PPP_PROT_REG_CB(on_sys_setfsgid_return)
@@ -163,7 +163,6 @@ PPP_PROT_REG_CB(on_sys_keyctl_return)
 PPP_PROT_REG_CB(on_sys_rmdir_return)
 PPP_PROT_REG_CB(on_sys_readlink_return)
 PPP_PROT_REG_CB(on_sys_capset_return)
-PPP_PROT_REG_CB(on_sys_acct_return)
 PPP_PROT_REG_CB(on_sys_prctl_return)
 PPP_PROT_REG_CB(on_sys_setgroups16_return)
 PPP_PROT_REG_CB(on_sys_sysfs_return)

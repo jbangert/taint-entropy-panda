@@ -153,5 +153,69 @@ bool init_plugin(void *self) {
 
 void uninit_plugin(void *self) {
 }
+
+#else
+#include "../syscalls2/gen_syscalls_ext_typedefs_linux_x86.h"
+#include "../syscalls2/gen_syscalls_ext_typedefs_linux_x64.h"
+uint64_t syscall_retval(CPUState *env){
+  #ifdef TARGET_I386
+  return env->regs[R_EAX]; 
+  #endif
+  assert("Unsupported architecture"==0);
+}
+//User mode version 
+//Not actually safety critical ..
+void panda_copyin_string(CPUState *env, unsigned long addr,uint8_t *ptr, size_t maxlen){
+  for(size_t i =0;i<maxlen-1;i++){
+    panda_virtual_memory_rw(env, addr+i,ptr + i, 1, false);
+    if(0 == ptr[i])
+      break;
+  }
+  ptr[maxlen-1] = 0;
+}
+std::set<int32_t> random_fds;
+void tentropy_open(CPUState *env, unsigned long pc, unsigned long va_fp, int flags, unsigned int mode){
+  uint8_t fp[4096];
+  panda_copyin_string(env, va_fp, fp, sizeof(fp));
+  if(strcmp((char *)fp,"/dev/random") && strcmp((char *)fp, "/dev/urandom"))
+    return;
+  int32_t fd =  syscall_retval(env);
+  if(fd<=0){
+    printf("Failed open on /dev/random or /dev/urandom\n");
+    return;
+  }
+  random_fds.emplace(fd);
+  printf("Found fd %u for %s\n", fd, fp);
+  return; 
+}
+void tentropy_close(CPUState *env,unsigned long pc, uint32_t fd){
+  random_fds.erase(fd);
+}
+void tentropy_read(CPUState *env, unsigned long pc, uint32_t fd, target_ulong buf,unsigned int count){
+  static int label = 0;
+  if(random_fds.count(fd) == 0)
+    return;
+  if(syscall_retval(env) != count){
+    printf("read on /dev/random did not succeed \n");
+    return;
+  }
+  for(size_t i = 0;i<count;i++){
+    printf("Tainting %" PRIu64 "\n",buf+i);
+    taint2_label_ram(buf+i , label++); //TODO: generate unique label
+  }
+}
+bool init_plugin(void *self) {
+  printf("Initializing user mode tentropy");
+  panda_require("syscalls2");
+  panda_require("taint2");
   
+    
+  assert(init_taint2_api());
+
+  PPP_REG_CB("syscalls2", on_sys_open_return, tentropy_open);
+  PPP_REG_CB("syscalls2", on_sys_read_return, tentropy_read);
+  PPP_REG_CB("syscalls2", on_sys_close_return, tentropy_close);
+  return true;
+  
+}
 #endif

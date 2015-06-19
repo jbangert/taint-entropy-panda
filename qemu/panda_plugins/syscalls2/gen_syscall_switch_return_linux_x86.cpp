@@ -16,7 +16,7 @@ extern "C" {
 #include "gen_syscall_ppp_boilerplate_return_linux_x86.cpp" // osarch
 
 void syscall_return_switch_linux_x86 ( CPUState *env, target_ulong pc, target_ulong ordinal) {  // osarch
-#ifdef TARGET_I386                                          // GUARD
+#if defined(TARGET_I386) && !defined(TARGET_X86_64)                                          // GUARD
     switch( ordinal ) {                          // CALLNO
 // 0 long sys_restart_syscall ['void']
 case 0: {
@@ -77,8 +77,8 @@ case 10: {
 target_ulong arg0 = get_return_pointer(env, 0);
 PPP_RUN_CB(on_sys_unlink_return, env,pc,arg0) ; 
 }; break;
-// 11 12 long sys_chdir ['const char __user *filename']
-case 11: {
+// 12 long sys_chdir ['const char __user *filename']
+case 12: {
 target_ulong arg0 = get_return_pointer(env, 0);
 PPP_RUN_CB(on_sys_chdir_return, env,pc,arg0) ; 
 }; break;
@@ -261,11 +261,6 @@ PPP_RUN_CB(on_sys_geteuid16_return, env,pc) ;
 // 50 long sys_getegid16 ['void']
 case 50: {
 PPP_RUN_CB(on_sys_getegid16_return, env,pc) ; 
-}; break;
-// 51 long sys_acct ['const char __user *name']
-case 51: {
-target_ulong arg0 = get_return_pointer(env, 0);
-PPP_RUN_CB(on_sys_acct_return, env,pc,arg0) ; 
 }; break;
 // 52 long sys_umount ['char __user *name', ' int flags']
 case 52: {
@@ -624,8 +619,8 @@ case 118: {
 uint32_t arg0 = get_return_32(env, 0);
 PPP_RUN_CB(on_sys_fsync_return, env,pc,arg0) ; 
 }; break;
-// 119 120 121 long sys_setdomainname ['char __user *name', ' int len']
-case 119: {
+// 121 long sys_setdomainname ['char __user *name', ' int len']
+case 121: {
 target_ulong arg0 = get_return_pointer(env, 0);
 int32_t arg1 = get_return_s32(env, 1);
 PPP_RUN_CB(on_sys_setdomainname_return, env,pc,arg0,arg1) ; 
@@ -635,8 +630,8 @@ case 122: {
 target_ulong arg0 = get_return_pointer(env, 0);
 PPP_RUN_CB(on_sys_newuname_return, env,pc,arg0) ; 
 }; break;
-// 123 124 long sys_adjtimex ['struct timex __user *txc_p']
-case 123: {
+// 124 long sys_adjtimex ['struct timex __user *txc_p']
+case 124: {
 target_ulong arg0 = get_return_pointer(env, 0);
 PPP_RUN_CB(on_sys_adjtimex_return, env,pc,arg0) ; 
 }; break;
@@ -874,8 +869,8 @@ target_ulong arg1 = get_return_pointer(env, 1);
 target_ulong arg2 = get_return_pointer(env, 2);
 PPP_RUN_CB(on_sys_getresuid16_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
-// 166 168 long sys_poll ['struct pollfd __user *ufds', ' unsigned int nfds', 'long timeout']
-case 166: {
+// 168 long sys_poll ['struct pollfd __user *ufds', ' unsigned int nfds', 'long timeout']
+case 168: {
 target_ulong arg0 = get_return_pointer(env, 0);
 uint32_t arg1 = get_return_32(env, 1);
 int32_t arg2 = get_return_s32(env, 2);
@@ -904,8 +899,8 @@ uint32_t arg3 = get_return_32(env, 3);
 uint32_t arg4 = get_return_32(env, 4);
 PPP_RUN_CB(on_sys_prctl_return, env,pc,arg0,arg1,arg2,arg3,arg4) ; 
 }; break;
-// 173 174 long rt_sigaction ['int sig', ' const struct sigaction __user * act', ' struct sigaction __user * oact', '  size_t sigsetsize']
-case 173: {
+// 174 long rt_sigaction ['int sig', ' const struct sigaction __user * act', ' struct sigaction __user * oact', '  size_t sigsetsize']
+case 174: {
 int32_t arg0 = get_return_s32(env, 0);
 target_ulong arg1 = get_return_pointer(env, 1);
 target_ulong arg2 = get_return_pointer(env, 2);
@@ -988,16 +983,16 @@ target_ulong arg0 = get_return_pointer(env, 0);
 target_ulong arg1 = get_return_pointer(env, 1);
 PPP_RUN_CB(on_sys_capset_return, env,pc,arg0,arg1) ; 
 }; break;
-// 186 187 long sys_sendfile ['int out_fd', ' int in_fd', 'off_t __user *offset', ' size_t count']
-case 186: {
+// 187 long sys_sendfile ['int out_fd', ' int in_fd', 'off_t __user *offset', ' size_t count']
+case 187: {
 int32_t arg0 = get_return_s32(env, 0);
 int32_t arg1 = get_return_s32(env, 1);
 target_ulong arg2 = get_return_pointer(env, 2);
 uint32_t arg3 = get_return_32(env, 3);
 PPP_RUN_CB(on_sys_sendfile_return, env,pc,arg0,arg1,arg2,arg3) ; 
 }; break;
-// 190 191 long sys_getrlimit ['unsigned int resource', 'struct rlimit __user *rlim']
-case 190: {
+// 191 long sys_getrlimit ['unsigned int resource', 'struct rlimit __user *rlim']
+case 191: {
 uint32_t arg0 = get_return_32(env, 0);
 target_ulong arg1 = get_return_pointer(env, 1);
 PPP_RUN_CB(on_sys_getrlimit_return, env,pc,arg0,arg1) ; 
@@ -1324,8 +1319,8 @@ uint32_t arg1 = get_return_32(env, 1);
 target_ulong arg2 = get_return_pointer(env, 2);
 PPP_RUN_CB(on_sys_sched_getaffinity_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
-// 243 244 245 long sys_io_setup ['unsigned nr_reqs', ' aio_context_t __user *ctx']
-case 243: {
+// 245 long sys_io_setup ['unsigned nr_reqs', ' aio_context_t __user *ctx']
+case 245: {
 uint32_t arg0 = get_return_32(env, 0);
 target_ulong arg1 = get_return_pointer(env, 1);
 PPP_RUN_CB(on_sys_io_setup_return, env,pc,arg0,arg1) ; 
