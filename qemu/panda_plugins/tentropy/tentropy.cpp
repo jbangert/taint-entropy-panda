@@ -200,7 +200,7 @@ void tentropy_read(CPUState *env, unsigned long pc, uint32_t fd, target_ulong bu
     return;
   }
   for(size_t i = 0;i<count;i++){
-    printf("Tainting %" PRIu64 "\n",buf+i);
+    // printf("Tainting %" PRIu64 "\n",buf+i);
     taint2_label_ram(buf+i , label++); //TODO: generate unique label
   }
 }

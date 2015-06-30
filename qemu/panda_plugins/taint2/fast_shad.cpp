@@ -44,16 +44,17 @@ FastShad::FastShad(uint64_t labelsets) {
     } else {
         printf("taint2: Allocating large fast_shad (%lu bytes).\n", bytes);
         array = (TaintData *)mmap(NULL, bytes, PROT_READ | PROT_WRITE,
-                MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB,
+                                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB,
                 -1, 0);
         if (array == (TaintData *)MAP_FAILED) {
             printf("taint2: Hugetlb failed. Trying without.\n");
             // try without HUGETLB
             array = (TaintData *)mmap(NULL, bytes, PROT_READ | PROT_WRITE,
-                    MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+                    MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
         }
         if (array == (TaintData *)MAP_FAILED) {
             puts(strerror(errno));
+            exit(-1);
         }
     }
 

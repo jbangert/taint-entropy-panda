@@ -988,8 +988,12 @@ void PandaTaintVisitor::visitCallInst(CallInst &I) {
             case Intrinsic::ctlz:
                 insertTaintMix(I, I.getArgOperand(0));
                 return;
+            case Intrinsic::dbg_value:
+            case Intrinsic::dbg_declare:
+                return;//Just ignore debug intristics - they shouldn't generate any code
             case Intrinsic::not_intrinsic:
                 break;
+
             default:
                 printf("taint2: Note: unsupported intrinsic %s in %s.\n",
                     calledF->getName().str().c_str(),
