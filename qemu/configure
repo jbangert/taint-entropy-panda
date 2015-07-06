@@ -2114,7 +2114,8 @@ EOF
     attr=no
   fi
 fi
-
+#### Protobuf C 
+LIBS="-lprotobuf-c -lprotobuf -lz $LIBS"
 ##########################################
 # iovec probe
 cat > $TMPC <<EOF
