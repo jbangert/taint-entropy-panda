@@ -24,6 +24,7 @@ extern "C" {
 #include "pandalog.h"        
 #include "panda_common.h"
 #include "../syscalls2/gen_syscalls_ext_typedefs_windows7_x86.h"
+#include "../syscalls2/gen_syscalls_ext_typedefs_windows7_x64.h"
 #include "panda_plugin_plugin.h"
 
 int before_block_exec(CPUState *env, TranslationBlock *tb);

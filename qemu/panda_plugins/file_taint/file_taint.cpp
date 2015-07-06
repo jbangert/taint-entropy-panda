@@ -12,6 +12,7 @@ extern "C" {
 #include "panda_plugin.h"
 #include "pandalog.h"
 #include "panda_common.h"
+#include "../syscalls2/gen_syscalls_ext_typedefs_linux_x64.h"
 #include "../syscalls2/gen_syscalls_ext_typedefs_linux_x86.h"
 #include "../taint2/taint2_ext.h"
 #include "panda_plugin_plugin.h" 
@@ -85,7 +86,7 @@ uint32_t last_open_asid;
 // 5 long sys_open(const char __user *filename,int flags, int mode);
 // typedef void (*on_sys_open_enter_t)(CPUState* env,target_ulong pc,target_ulong filename,int32_t flags,int32_t mode);
 
-void open_enter(CPUState* env,target_ulong pc,target_ulong filename,int32_t flags,int32_t mode) {
+void open_enter(CPUState* env,target_ulong pc,target_ulong filename,int32_t flags,uint32_t mode) {
     uint32_t i;
     char the_filename[MAX_FILENAME];
     the_filename[0] = 0;
@@ -111,7 +112,7 @@ void open_enter(CPUState* env,target_ulong pc,target_ulong filename,int32_t flag
 }
 
 
-void open_return(CPUState* env,target_ulong pc,target_ulong filename,int32_t flags,int32_t mode) {
+void open_return(CPUState* env,target_ulong pc,target_ulong filename,int32_t flags,uint32_t mode) {
     //    printf ("returning from open\n");
     if (saw_open && the_asid == panda_current_asid(env)) {
         saw_open = false;
