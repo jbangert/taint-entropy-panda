@@ -29,8 +29,8 @@ PANDAENDCOMMENT */
 #include <stdint.h>
 #include "my_bool.h"
 #include "shad_dir_64.h"
-
-typedef const std::set<uint32_t> *LabelSetP;
+#include "label_set.h"
+// typedef const std::set<uint32_t> *LabelSetP;
 
 // 64-bit addresses
 // create a new table

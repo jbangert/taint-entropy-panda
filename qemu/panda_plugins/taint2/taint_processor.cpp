@@ -262,7 +262,7 @@ uint32_t ls_card(LabelSetP ls) {
 
 
 // iterate over 
-void tp_lsr_iter(std::set<uint32_t> rendered, int (*app)(uint32_t el, void *stuff1), void *stuff2) {
+void tp_lsr_iter(LabelSet rendered, int (*app)(uint32_t el, void *stuff1), void *stuff2) {
     for (uint32_t el : rendered) {     
         //        printf ("el=%d\n", el);
         if ((app(el, stuff2)) != 0) break;
@@ -271,7 +271,7 @@ void tp_lsr_iter(std::set<uint32_t> rendered, int (*app)(uint32_t el, void *stuf
     
 // retrieve ls for this addr
 void tp_ls_iter(LabelSetP ls, int (*app)(uint32_t el, void *stuff1), void *stuff2) {
-    std::set<uint32_t> rendered = label_set_render_set(ls);
+    LabelSet rendered = label_set_render_set(ls);
     tp_lsr_iter(rendered, app, stuff2);
 }
 

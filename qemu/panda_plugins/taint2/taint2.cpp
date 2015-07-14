@@ -673,7 +673,7 @@ void __taint2_delete_ram(uint64_t pa) {
 }
 
 void __taint2_labelset_spit(LabelSetP ls) {
-    std::set<uint32_t> rendered(label_set_render_set(ls));
+    LabelSet rendered(label_set_render_set(ls));
     for (uint32_t l : rendered) {
         printf("%u ", l);
     }

@@ -47,8 +47,7 @@ PANDAENDCOMMENT */
 #include <stdint.h>
 #include "my_bool.h"
 #include "shad_dir_32.h"
-
-typedef const std::set<uint32_t> *LabelSetP;
+#include "label_set.h"
 
 // create a new table
 static SdTable *__shad_dir_table_new_32(SdDir32 *shad_dir) {

@@ -27,13 +27,14 @@ extern "C" {
 #include <set>
 
 extern "C" {
-typedef const std::set<uint32_t> *LabelSetP;
+typedef std::set<uint32_t> LabelSet;
+typedef const LabelSet *LabelSetP;
 
 LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2);
 LabelSetP label_set_singleton(uint32_t label);
 }
 
 void label_set_iter(LabelSetP ls, void (*leaf)(uint32_t, void *), void *user);
-std::set<uint32_t> label_set_render_set(LabelSetP ls);
+LabelSet label_set_render_set(LabelSetP ls);
 
 #endif

@@ -62,7 +62,7 @@ public:
     }
 };
 
-static ArenaAlloc<std::set<uint32_t>> LSA;
+static ArenaAlloc<LabelSet> LSA;
 
 namespace std {
 template<>
@@ -88,7 +88,7 @@ class hash<pair<LabelSetP, LabelSetP>> {
 };
 }
 
-static std::unordered_set<std::set<uint32_t>> label_sets;
+static std::unordered_set<LabelSet> label_sets;
 LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2) {
     static std::unordered_map<std::pair<LabelSetP, LabelSetP>, LabelSetP> memoized_unions;
 
@@ -106,7 +106,7 @@ LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2) {
             }
         }
 
-        std::set<uint32_t> temp(*min);
+        LabelSet temp(*min);
         for (auto l : *max) {
             temp.insert(l);
         }
@@ -114,7 +114,7 @@ LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2) {
         // insert returns a pair <iterator, bool>; second is whether it happened
         // first is iterator to new/existing element
         auto it = label_sets.insert(temp).first;
-        const std::set<uint32_t> *result = &(*it);
+        const LabelSet *result = &(*it);
 
         memoized_unions.insert(std::make_pair(minmax, result));
         return result;
@@ -126,12 +126,12 @@ LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2) {
 }
 
 LabelSetP label_set_singleton(uint32_t label) {
-    std::set<uint32_t> temp;
+    LabelSet temp;
     temp.insert(label);
     return LSA.alloc(temp);
 }
 
-std::set<uint32_t> label_set_render_set(LabelSetP ls) {
+LabelSet label_set_render_set(LabelSetP ls) {
     if (ls) return *ls;
-    else return std::set<uint32_t>();
+    else return LabelSet();
 }
