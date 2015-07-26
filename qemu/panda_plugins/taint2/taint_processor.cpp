@@ -342,6 +342,8 @@ void tp_delete(Shad *shad, Addr *a) {
 
 // here we are storing a copy of ls in the shadow memory.
 // so ls is caller's to free
+
+//XXX: This doesn't actually do copy, does it?
 static void tp_labelset_put(Shad *shad, Addr *a, LabelSetP ls) {
     switch (a->typ) {
         case HADDR:
@@ -431,7 +433,7 @@ std::set < uint32_t > labels_applied;
 // label -- associate label l with address a
 void tp_label(Shad *shad, Addr *a, uint32_t l) {
     assert (shad != NULL);
-    LabelSetP ls = label_set_singleton(l);
+    LabelSetP ls = label_set_singleton(l); 
     tp_labelset_put(shad, a, ls);
     labels_applied.insert(l);
 }

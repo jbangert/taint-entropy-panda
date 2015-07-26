@@ -12,7 +12,7 @@ DBGFLAGS+= #-DTAINTDEBUG
 QEMU_CFLAGS+= $(DBGFLAGS)
 QEMU_CXXFLAGS+= $(DBGFLAGS)
 
-QEMU_CXXFLAGS+= -std=c++11 -Wno-type-limits
+QEMU_CXXFLAGS+= -std=c++11 -Wno-type-limits -ggdb 
 
 TAINT_OP_CFLAGS= -O3 -std=c11 -Wno-typedef-redefinition -fno-stack-protector -fno-omit-frame-pointer -Wno-type-limits
 

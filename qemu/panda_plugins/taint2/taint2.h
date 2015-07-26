@@ -30,7 +30,7 @@
 
 //#define TAINTDEBUG // print out all debugging info for taint ops
 
-typedef const std::set<uint32_t> *LabelSetP;
+#include "label_set.h"
 typedef struct FastShad FastShad;
 typedef struct SdDir32 SdDir32;
 typedef struct SdDir64 SdDir64;

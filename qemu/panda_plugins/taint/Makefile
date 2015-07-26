@@ -3,13 +3,13 @@ PLUGIN_NAME=taint
 # Include the PANDA Makefile rules
 include ../panda.mak
 
-QEMU_CFLAGS+=-std=c++11
+QEMU_CFLAGS+=-std=c++14
 
 
 # Include files and lib from LLVM
 CXXFLAGS+=$(LLVM_CXXFLAGS)
 
-QEMU_CXXFLAGS+= -std=c++11
+QEMU_CXXFLAGS+= -std=c++14
 # Since std::vector<bool> uses less compute and less memory, it's the default now
 # Comment this out and leave the next entry commented to enable std::set<uint32_t> labelset implementation
 QEMU_CXXFLAGS+= -DLABELSET_VECTOR

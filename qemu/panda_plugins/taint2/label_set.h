@@ -24,17 +24,32 @@ extern "C" {
 #include <cstdint>
 
 #include <map>
+#include <vector>
 #include <set>
-
-extern "C" {
-typedef std::set<uint32_t> LabelSet;
+typedef uint32_t taint_label_t;
+class LabelSet;
 typedef const LabelSet *LabelSetP;
+class LabelSet{
+ protected:
+  std::vector<uint32_t> _data;
+ public:
+  std::vector<uint32_t>::const_iterator begin() const { return _data.begin(); }
+  std::vector<uint32_t>::const_iterator end() const { return _data.end(); }
+  size_t size() { return _data.size();}
+  LabelSet();
+  LabelSet(const LabelSet &other);
+  LabelSet(uint32_t label);
+  LabelSet(const LabelSet *l1,const  LabelSet *l2);
+  bool operator==(const LabelSet &other) const {
+    return _data == other._data;
+  } 
+};
 
-LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2);
-LabelSetP label_set_singleton(uint32_t label);
-}
+LabelSetP label_set_union(const LabelSetP ls1, const LabelSetP ls2);
 
-void label_set_iter(LabelSetP ls, void (*leaf)(uint32_t, void *), void *user);
+const LabelSet * label_set_singleton(uint32_t label);
+
+//void label_set_iter(LabelSetP ls, void (*leaf)(uint32_t, void *), void *user);
 LabelSet label_set_render_set(LabelSetP ls);
 
 #endif

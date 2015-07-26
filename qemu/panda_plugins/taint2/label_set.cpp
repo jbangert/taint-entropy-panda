@@ -8,7 +8,7 @@ extern "C" {
 #include <unordered_set>
 #include <unordered_map>
 #include <functional>
-
+#include <algorithm>
 #include "label_set.h"
 
 template<typename T>
@@ -66,10 +66,11 @@ static ArenaAlloc<LabelSet> LSA;
 
 namespace std {
 template<>
-class hash<set<uint32_t>> {
+class hash<LabelSet> {
   public:
-    size_t operator()(const set<uint32_t> &labels) const {
+    size_t operator()(const LabelSet &labels) const {
         uint64_t result = 0;
+        //pretty shitty hash function?
         for (uint32_t l : labels) {
             result ^= l;
             result = result << 11 | result >> 53;
@@ -88,15 +89,72 @@ class hash<pair<LabelSetP, LabelSetP>> {
 };
 }
 
+LabelSet::LabelSet() : _data(0){
+}
+LabelSet::LabelSet(const LabelSet &other) : _data(other._data) {
+}
+LabelSet::LabelSet(uint32_t label) :_data(1,label) {
+}
+//Count elements in l1 and l2
+size_t merged_size(const LabelSet *l1, const LabelSet *l2) {
+  size_t s = 0;
+  auto i1 = l1->begin(), i2 = l2->begin(), end1 = l1->end() , end2 = l2->end();
+  while(i1 != end1 && i2 != end2){
+    if(*i1 < *i2)
+      i1++;
+    else if(*i2 < *i1)
+      i2++;
+    else{
+      i1++;
+      i2++;
+    }
+    s++; // assume each array contains no duplicates
+
+  }
+  return s + (end2-i2) + (end1-i1);
+}
+LabelSet::LabelSet(const LabelSet *l1,const  LabelSet *l2): _data(merged_size(l1,l2)){
+  auto i1 = l1->begin(), i2 = l2->begin(), end1 = l1->end() , end2 = l2->end();
+  auto o = _data.begin();
+  while(i1 != end1 && i2 != end2){
+    if(*i1 < *i2){
+      *o = *i1;
+      i1++;
+    }
+    else if(*i2 < *i1){
+      *o = *i2;
+      i2++;
+    }
+    else{
+      *o = *i1;
+      i1++;
+      i2++;
+    }
+    o++;
+  }
+  while(i1 != end1)
+    *(o++) = *(i1++);
+  while(i2 != end2)
+    *(o++) = *(i2++);
+  assert(o == _data.end());
+}
 static std::unordered_set<LabelSet> label_sets;
-LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2) {
+
+//XXX: use skew heaps?
+LabelSetP label_set_union(const LabelSetP ls1,const LabelSetP ls2) {
     static std::unordered_map<std::pair<LabelSetP, LabelSetP>, LabelSetP> memoized_unions;
 
     if (ls1 == ls2) {
         return ls1;
     } else if (ls1 && ls2) {
-        LabelSetP min = std::min(ls1, ls2);
-        LabelSetP max = std::max(ls1, ls2);
+        LabelSetP min, max;
+        if(ls1<ls2){ // compare pointers, not sets. All pointers come from label_sets
+            min = ls1;
+            max = ls2;
+        } else {
+            min = ls1;
+            max = ls2;
+        }
         std::pair<LabelSetP, LabelSetP> minmax(min, max);
 
         {
@@ -105,16 +163,8 @@ LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2) {
                 return it->second;
             }
         }
-
-        LabelSet temp(*min);
-        for (auto l : *max) {
-            temp.insert(l);
-        }
-
-        // insert returns a pair <iterator, bool>; second is whether it happened
-        // first is iterator to new/existing element
-        auto it = label_sets.insert(temp).first;
-        const LabelSet *result = &(*it);
+        auto it = label_sets.emplace(min,max);
+        const LabelSetP result = &(*it.first);
 
         memoized_unions.insert(std::make_pair(minmax, result));
         return result;
@@ -126,11 +176,9 @@ LabelSetP label_set_union(LabelSetP ls1, LabelSetP ls2) {
 }
 
 LabelSetP label_set_singleton(uint32_t label) {
-    LabelSet temp;
-    temp.insert(label);
-    return LSA.alloc(temp);
+    auto i = label_sets.emplace(LabelSet(label));
+    return &(*i.first);
 }
-
 LabelSet label_set_render_set(LabelSetP ls) {
     if (ls) return *ls;
     else return LabelSet();
