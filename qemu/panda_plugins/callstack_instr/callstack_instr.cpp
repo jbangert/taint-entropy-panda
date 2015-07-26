@@ -43,8 +43,8 @@ void uninit_plugin(void *);
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <algorithm>
 
@@ -87,7 +87,7 @@ struct stack_entry {
 
 // Track the different stacks we have seen to handle multiple threads
 // within a single process.
-std::map<target_ulong,std::set<target_ulong>> stacks_seen;
+std::unordered_map<target_ulong,std::unordered_set<target_ulong>> stacks_seen;
 
 // Use a typedef here so we can switch between the stack heuristic and
 // the original code easily
@@ -100,11 +100,11 @@ typedef target_ulong stackid;
 #endif
 
 // stackid -> shadow stack
-std::map<stackid, std::vector<stack_entry>> callstacks;
+std::unordered_map<stackid, std::vector<stack_entry>> callstacks;
 // stackid -> function entry points
-std::map<stackid, std::vector<target_ulong>> function_stacks;
+std::unordered_map<stackid, std::vector<target_ulong>> function_stacks;
 // EIP -> instr_type
-std::map<target_ulong, instr_type> call_cache;
+std::unordered_map<target_ulong, instr_type> call_cache;
 int last_ret_size = 0;
 
 static inline bool in_kernelspace(CPUState *env) {
