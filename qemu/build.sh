@@ -42,8 +42,8 @@ echo $LLVM_BIT
      --disable-xen \
      --disable-libiscsi \
      $LLVM_BIT \
-     --extra-cflags="-O0 -ggdb  -I/usr/local/include" \
-     --extra-cxxflags="-O0 -ggdb " \
+     --extra-cflags="-O3 -fno-omit-frame-pointer -ggdb  -I/usr/local/include" \
+     --extra-cxxflags="-O3 -fno-omit-frame-pointer -ggdb " \
      --extra-ldflags="-L/usr/local/lib -L/usr/local/lib64 -L/usr/local/lib -lprotobuf-c -lprotobuf -lpthread" \
      --python=/usr/bin/python2
 

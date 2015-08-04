@@ -139,10 +139,10 @@ LabelSet::LabelSet(const LabelSet *l1,const  LabelSet *l2): _data(merged_size(l1
   assert(o == _data.end());
 }
 static std::unordered_set<LabelSet> label_sets;
-
+static std::unordered_map<std::pair<LabelSetP, LabelSetP>, LabelSetP> memoized_unions;
 //XXX: use skew heaps?
 LabelSetP label_set_union(const LabelSetP ls1,const LabelSetP ls2) {
-    static std::unordered_map<std::pair<LabelSetP, LabelSetP>, LabelSetP> memoized_unions;
+    
 
     if (ls1 == ls2) {
         return ls1;
