@@ -41,10 +41,7 @@ extern void taint_state_changed(FastShad *fast_shad, uint64_t addr);
 #define taint_log(...) qemu_log_mask(CPU_LOG_TAINT_OPS, ## __VA_ARGS__)
 //#define taint_log(...) printf(__VA_ARGS__)
 #endif
-
-void *memset(void *dest, int val, size_t n);
-void *memcpy(void *dest, const void *src, size_t n);
-
+#include <string.h>
 
 struct TaintData {
     LabelSetP ls;

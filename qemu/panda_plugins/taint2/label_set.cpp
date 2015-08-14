@@ -11,6 +11,27 @@ extern "C" {
 #include <algorithm>
 #include "label_set.h"
 
+namespace std { 
+template<>
+class hash<std::pair<LabelSetP, LabelSetP > > {
+  public:
+    size_t operator()(const pair<LabelSetP, LabelSetP> &labels) const {
+      return hash<LabelSetP>()(labels.first) ^
+        (hash<LabelSetP>()(labels.second) << (sizeof(LabelSetP) / 2));
+    }
+};
+}
+#define CONFIG_INT_LABEL
+#ifdef CONFIG_INT_LABEL
+static uint64_t label_id = UINT32_MAX + 1;
+
+LabelSetP label_set_singleton(uint32_t label) {
+  return (uint64_t)label;
+}
+LabelSet label_set_render_set(LabelSetP ls) {
+  return ls;
+}
+#else
 template<typename T>
 class ArenaAlloc {
 private:
@@ -78,17 +99,7 @@ class hash<LabelSet> {
         return result;
     }
 };
-
-template<>
-class hash<pair<LabelSetP, LabelSetP>> {
-  public:
-    size_t operator()(const pair<LabelSetP, LabelSetP> &labels) const {
-        return hash<LabelSetP>()(labels.first) ^
-            (hash<LabelSetP>()(labels.second) << (sizeof(LabelSetP) / 2));
-    }
 };
-}
-
 LabelSet::LabelSet() : _data(0){
 }
 LabelSet::LabelSet(const LabelSet &other) : _data(other._data) {
@@ -139,6 +150,17 @@ LabelSet::LabelSet(const LabelSet *l1,const  LabelSet *l2): _data(merged_size(l1
   assert(o == _data.end());
 }
 static std::unordered_set<LabelSet> label_sets;
+
+LabelSetP label_set_singleton(uint32_t label) {
+    auto i = label_sets.emplace(LabelSet(label));
+    return &(*i.first);
+}
+LabelSet label_set_render_set(LabelSetP ls) {
+    if (ls) return *ls;
+    else return LabelSet();
+}
+#endif 
+
 static std::unordered_map<std::pair<LabelSetP, LabelSetP>, LabelSetP> memoized_unions;
 //XXX: use skew heaps?
 LabelSetP label_set_union(const LabelSetP ls1,const LabelSetP ls2) {
@@ -147,6 +169,7 @@ LabelSetP label_set_union(const LabelSetP ls1,const LabelSetP ls2) {
     if (ls1 == ls2) {
         return ls1;
     } else if (ls1 && ls2) {
+      #if 0
         LabelSetP min, max;
         if(ls1<ls2){ // compare pointers, not sets. All pointers come from label_sets
             min = ls1;
@@ -163,23 +186,24 @@ LabelSetP label_set_union(const LabelSetP ls1,const LabelSetP ls2) {
                 return it->second;
             }
         }
+        #ifdef CONFIG_INT_LABEL
+        const LabelSetP result = label_id++;
+        #else
         auto it = label_sets.emplace(min,max);
         const LabelSetP result = &(*it.first);
-
+        #endif
         memoized_unions.insert(std::make_pair(minmax, result));
         return result;
+        #endif
+
     } else if (ls1) {
         return ls1;
     } else if (ls2) {
         return ls2;
-    } else return nullptr;
-}
-
-LabelSetP label_set_singleton(uint32_t label) {
-    auto i = label_sets.emplace(LabelSet(label));
-    return &(*i.first);
-}
-LabelSet label_set_render_set(LabelSetP ls) {
-    if (ls) return *ls;
-    else return LabelSet();
+    } else
+#ifdef CONFIG_INT_LABEL
+      return 0;
+#else
+      return nullptr;
+#endif
 }
