@@ -153,7 +153,9 @@ void taint_mix(
     taint_log("mix: %lx[%lx+%lx] <- %lx+%lx\n",
             (uint64_t)shad, dest, dest_size, src, src_size);
     TaintData td = mixed_labels(shad, src, src_size);
+    #ifndef CONFIG_INT_LABEL
     if (td.ls) td.tcn++;
+    #endif
     bulk_set(shad, dest, dest_size, td);
 }
 
@@ -176,7 +178,9 @@ void taint_pointer(
     }
 
     TaintData td = mixed_labels(shad_ptr, ptr, ptr_size);
+    #ifndef CONFIG_INT_LABEL
     if (td.ls) td.tcn++;
+    #endif
     if (src == ones) {
         bulk_set(shad_dest, dest, size, td);
     } else {

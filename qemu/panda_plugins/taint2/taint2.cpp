@@ -673,11 +673,13 @@ void __taint2_delete_ram(uint64_t pa) {
 }
 
 void __taint2_labelset_spit(LabelSetP ls) {
+#ifndef CONFIG_INT_LABEL
     LabelSet rendered(label_set_render_set(ls));
     for (uint32_t l : rendered) {
         printf("%u ", l);
     }
     printf("\n");
+#endif
 }
 
 

@@ -256,17 +256,25 @@ uint32_t tp_query_tcn_llvm(Shad *shad, int reg_num, int offset) {
 
 
 uint32_t ls_card(LabelSetP ls) {
-    return label_set_render_set(ls).size();
+#ifdef CONFIG_INT_LABEL
+  return 1;
+#else
+  return label_set_render_set(ls).size();
+#endif
 }
 
 
 
 // iterate over 
 void tp_lsr_iter(LabelSet rendered, int (*app)(uint32_t el, void *stuff1), void *stuff2) {
+#ifdef CONFIG_INT_LABEL
+  app(rendered,stuff2);
+#else
     for (uint32_t el : rendered) {     
         //        printf ("el=%d\n", el);
         if ((app(el, stuff2)) != 0) break;
     }
+#endif
 }
     
 // retrieve ls for this addr

@@ -45,8 +45,9 @@ extern void taint_state_changed(FastShad *fast_shad, uint64_t addr);
 
 struct TaintData {
     LabelSetP ls;
+#ifndef CONFIG_INT_LABEL
     uint32_t tcn;
-
+    
     TaintData() : ls(NULL), tcn(0) {}
     TaintData(LabelSetP ls) : ls(ls), tcn(0) {}
     TaintData(LabelSetP ls, uint32_t tcn) : ls(ls), tcn(ls ? tcn : 0) {}
@@ -67,6 +68,23 @@ struct TaintData {
                 label_set_union(td1.ls, td2.ls),
                 std::max(td1.tcn, td2.tcn) + 1);
     }
+#else
+    TaintData() : ls(0) {}
+    TaintData(LabelSetP ls) : ls(ls) {}
+
+    void add(TaintData td) {
+        ls = label_set_union(ls, td.ls);
+    }
+
+    static TaintData copy_union(TaintData td1, TaintData td2) {
+        return TaintData(label_set_union(td1.ls, td2.ls));
+    }
+
+    static TaintData comp_union(TaintData td1, TaintData td2) {
+        return TaintData(label_set_union(td1.ls, td2.ls));
+    }
+#endif
+        
 };
 
 class FastShad {
@@ -187,7 +205,11 @@ public:
     }
 
     inline uint32_t query_tcn(uint64_t addr) {
+    #ifdef CONFIG_INT_LABEL
+    return 0;
+    #else
         return (query_full(addr)).tcn;
+    #endif
     }
 
 };

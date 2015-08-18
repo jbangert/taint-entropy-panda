@@ -21,16 +21,16 @@ class hash<std::pair<LabelSetP, LabelSetP > > {
     }
 };
 }
-#define CONFIG_INT_LABEL
 #ifdef CONFIG_INT_LABEL
 static uint64_t label_id = UINT32_MAX + 1;
 
 LabelSetP label_set_singleton(uint32_t label) {
-  return (uint64_t)label;
+  return (LabelSetP)label;
 }
 LabelSet label_set_render_set(LabelSetP ls) {
   return ls;
 }
+std::unordered_map<LabelSetP, std::pair<LabelSetP, LabelSetP> > reverse_unions;  
 #else
 template<typename T>
 class ArenaAlloc {
@@ -169,7 +169,6 @@ LabelSetP label_set_union(const LabelSetP ls1,const LabelSetP ls2) {
     if (ls1 == ls2) {
         return ls1;
     } else if (ls1 && ls2) {
-      #if 0
         LabelSetP min, max;
         if(ls1<ls2){ // compare pointers, not sets. All pointers come from label_sets
             min = ls1;
@@ -188,14 +187,13 @@ LabelSetP label_set_union(const LabelSetP ls1,const LabelSetP ls2) {
         }
         #ifdef CONFIG_INT_LABEL
         const LabelSetP result = label_id++;
+        reverse_unions.emplace(result, minmax );
         #else
         auto it = label_sets.emplace(min,max);
         const LabelSetP result = &(*it.first);
         #endif
-        memoized_unions.insert(std::make_pair(minmax, result));
+        memoized_unions.emplace(minmax, result);
         return result;
-        #endif
-
     } else if (ls1) {
         return ls1;
     } else if (ls2) {

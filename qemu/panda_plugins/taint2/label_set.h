@@ -23,9 +23,16 @@ extern "C" {
 #include <cstdio>
 #include <cstdint>
 
+
 #include <map>
 #include <vector>
 #include <set>
+#define CONFIG_INT_LABEL
+#ifdef CONFIG_INT_LABEL
+typedef uint64_t LabelSetP;
+typedef uint64_t LabelSet;
+
+#else 
 typedef uint32_t taint_label_t;
 class LabelSet;
 typedef const LabelSet *LabelSetP;
@@ -44,10 +51,10 @@ class LabelSet{
     return _data == other._data;
   } 
 };
-
+#endif
 LabelSetP label_set_union(const LabelSetP ls1, const LabelSetP ls2);
 
-const LabelSet * label_set_singleton(uint32_t label);
+LabelSetP label_set_singleton(uint32_t label);
 
 //void label_set_iter(LabelSetP ls, void (*leaf)(uint32_t, void *), void *user);
 LabelSet label_set_render_set(LabelSetP ls);

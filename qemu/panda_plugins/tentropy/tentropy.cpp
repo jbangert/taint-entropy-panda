@@ -143,7 +143,6 @@ bool init_plugin(void *self) {
     pcb.after_block_translate  = after_block_translate;
     panda_register_callback(self, PANDA_CB_AFTER_BLOCK_TRANSLATE, pcb);
     // register the tstringsearch_match fn to be called at the on_ssm site within panda_stringsearch
-    //PPP_REG_CB("", on_ssm, tstringsearch_match) ;
     PPP_REG_CB("callstack_instr", on_call, tentropy_oncall);
     PPP_REG_CB("callstack_instr", on_ret, tentropy_onret);
     return true;
