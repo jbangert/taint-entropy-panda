@@ -548,6 +548,7 @@ void i386_hypercall_callback(CPUState *env){
             panda_virtual_memory_rw(env, EAX, (uint8_t *) &phs, sizeof(phs), false);
             if (phs.magic == 0xabcd) {
                 if  (phs.action == 11) {
+                  printf("panda hypercall to query taint: vaddr=0x%lx\n", (uint64_t) EAX);
                     // it's a lava query
                     lava_taint_query(phs);               
                 }
