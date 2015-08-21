@@ -9,9 +9,9 @@
 
 #ifdef PANDA
 #include "stdint.h"
-typedef uint32_t lavaint;
+typedef uint64_t lavaint;
 #else
-typedef unsigned int lavaint;
+typedef unsigned long lavaint;
 #endif
 
 #pragma pack(push,1)

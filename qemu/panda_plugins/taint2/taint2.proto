@@ -13,7 +13,7 @@ message SrcInfo {
 message TaintQuery {
     required uint64 ptr = 1;
     required uint32 tcn = 2;
-    required uint32 offset = 3;
+    required uint64 offset = 3;
 }
 
 message AttackPoint {
@@ -36,3 +36,10 @@ message TaintQueryHypercall {
 optional TaintQueryHypercall taint_query_hypercall = 38;
 
 optional AttackPoint attack_point = 39;
+message TaintTreeNode {
+    required uint64 taintid = 1;
+    required uint64 comp1 = 2;
+    required uint64 comp2 = 3;
+}
+
+optional TaintTreeNode taint_tree_node = 4000;

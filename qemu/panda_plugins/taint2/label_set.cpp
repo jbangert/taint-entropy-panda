@@ -30,7 +30,8 @@ LabelSetP label_set_singleton(uint32_t label) {
 LabelSet label_set_render_set(LabelSetP ls) {
   return ls;
 }
-std::unordered_map<LabelSetP, std::pair<LabelSetP, LabelSetP> > reverse_unions;  
+std::unordered_map<LabelSetP, std::pair<LabelSetP, LabelSetP> > reverse_unions;
+
 #else
 template<typename T>
 class ArenaAlloc {

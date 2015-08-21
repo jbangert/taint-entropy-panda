@@ -43,8 +43,8 @@ void print_process_key_index(Panda__ProcessKeyIndex *pki) {
     printf (" index = [%u] ", pki->index);            
 }
 
-std::map<std::string,uint32_t> str2ind;
-std::map<uint32_t,std::string> ind2str;
+//std::map<std::string,uint32_t> str2ind;
+//std::map<uint32_t,std::string> ind2str;
 
 
 char *gstr(uint32_t ind) {
@@ -53,8 +53,8 @@ char *gstr(uint32_t ind) {
 
 int main (int argc, char **argv) {
     
-    str2ind = LoadDB(std::string("/tmp/lavadb"));
-    ind2str = InvertDB(str2ind);
+    //  str2ind = LoadDB(std::string("/tmp/lavadb"));
+    //    ind2str = InvertDB(str2ind);
     
     pandalog_open(argv[1], "r");
     Panda__LogEntry *ple;

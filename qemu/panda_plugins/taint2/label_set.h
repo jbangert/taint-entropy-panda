@@ -27,10 +27,12 @@ extern "C" {
 #include <map>
 #include <vector>
 #include <set>
+#include <unordered_map>
 #define CONFIG_INT_LABEL
 #ifdef CONFIG_INT_LABEL
 typedef uint64_t LabelSetP;
 typedef uint64_t LabelSet;
+extern std::unordered_map<LabelSetP, std::pair<LabelSetP, LabelSetP> > reverse_unions;
 
 #else 
 typedef uint32_t taint_label_t;

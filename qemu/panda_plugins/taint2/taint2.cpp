@@ -28,6 +28,7 @@
 #endif
 
 #include "label_set.h"
+#include <unordered_set>
 
 
 #include "../common/prog_point.h"
@@ -35,7 +36,6 @@
 extern "C" {
 
 #include <sys/time.h>
-
 #include "qemu-common.h"
 #include "cpu-all.h"
 #include "panda_plugin.h"
@@ -405,19 +405,25 @@ void lava_src_info_pandalog(PandaHypercallStruct phs) {
 
 
 // used to ensure that we only write a label sets to pandalog once
-std::set < LabelSetP > ls_returned;
+static std::unordered_set < LabelSetP > ls_returned;
 
 
-
-// queries taint on this addr and
-// if anything is tainted returns 1, else returns 0
-// if there is taint, we write an entry to the pandalog. 
-uint8_t __taint2_query_pandalog (Addr a, uint32_t offset) {
-    uint8_t saw_taint = 0;
-    LabelSetP ls = tp_query(shadow, a);
-    if (ls) {
-        saw_taint = 1;
-        if (ls_returned.count(ls) == 0) {
+static void log_LabelSet(LabelSetP ls){
+  #ifdef CONFIG_INT_LABEL
+  if(ls_returned.count(ls)==0){
+    ls_returned.insert(ls);
+    Panda__TaintTreeNode tn = PANDA__TAINT_TREE_NODE__INIT;
+    tn.taintid = ls;
+    tn.comp1 = reverse_unions[ls].first;
+    tn.comp2 = reverse_unions[ls].second;
+    Panda__LogEntry ple = PANDA__LOG_ENTRY__INIT;
+    ple.taint_tree_node  = &tn;
+    pandalog_write_entry(&ple);
+    log_LabelSet(tn.comp1);
+    log_LabelSet(tn.comp2);
+  }
+  #else
+  if (ls_returned.count(ls) == 0) {
             // we only want to actually write a particular set contents to pandalog once
             // this ls hasn't yet been written to pandalog
             // write out mapping from ls pointer to labelset contents
@@ -436,7 +442,17 @@ uint8_t __taint2_query_pandalog (Addr a, uint32_t offset) {
             free (tquls->label);
             free (tquls);
         }
-        // safe to refer to the set by the pointer in this next message
+  #endif
+}
+// queries taint on this addr and
+// if anything is tainted returns 1, else returns 0
+// if there is taint, we write an entry to the pandalog.
+uint8_t __taint2_query_pandalog (Addr a, uint32_t offset) {
+    uint8_t saw_taint = 0;
+    LabelSetP ls = tp_query(shadow, a);
+    if (ls) {
+        saw_taint = 1;
+        log_LabelSet(ls);
         Panda__TaintQuery *tq = (Panda__TaintQuery *) malloc(sizeof(Panda__TaintQuery));
         *tq = PANDA__TAINT_QUERY__INIT;
         tq->ptr = (uint64_t) ls;
@@ -462,10 +478,10 @@ void lava_taint_query (PandaHypercallStruct phs) {
     if  (taintEnabled && (taint2_num_labels_applied() > 0)){
         // okay, taint is on and some labels have actually been applied 
         // is there *any* taint on this extent
-        uint32_t num_tainted = 0;
-        for (uint32_t offset=0; offset<phs.len; offset++) {
-            uint32_t va = phs.buf + offset;
-            uint32_t pa =  panda_virt_to_phys(env, va);
+        uint64_t num_tainted = 0;
+        for (uint64_t offset=0; offset<phs.len; offset++) {
+            uint64_t va = phs.buf + offset;
+            uint64_t pa =  panda_virt_to_phys(env, va);
             if ((int) pa != -1) {                         
                 Addr a = make_maddr(pa);
                 if (taint2_query(a)) {
@@ -484,9 +500,9 @@ void lava_taint_query (PandaHypercallStruct phs) {
             // obtain the actual data out of memory
             // NOTE: first 32 bytes only!
             uint32_t data[32];
-            uint32_t n = phs.len;
+            uint64_t n = phs.len;
             if (32 < phs.len) n = 32;
-            for (uint32_t i=0; i<n; i++) {
+            for (uint64_t i=0; i<n; i++) {
                 data[i] = 0;
                 uint8_t c;
                 panda_virtual_memory_rw(env, phs.buf+i, &c, 1, false);
@@ -499,13 +515,13 @@ void lava_taint_query (PandaHypercallStruct phs) {
             pandalog_write_entry(&ple);
             free(tqh);
             // 2. write out src-level info
-            lava_src_info_pandalog(phs);
+            //            lava_src_info_pandalog(phs);
             // 3. write out callstack info
-            callstack_pandalog();
+            //            callstack_pandalog();
             // 4. iterate over the bytes in the extent and pandalog detailed info about taint
-            for (uint32_t offset=0; offset<phs.len; offset++) {
-                uint32_t va = phs.buf + offset;
-                uint32_t pa =  panda_virt_to_phys(env, va);
+            for (uint64_t offset=0; offset<phs.len; offset++) {
+                uint64_t va = phs.buf + offset;
+                uint64_t pa =  panda_virt_to_phys(env, va);
                 if ((int) pa != -1) {                         
                     Addr a = make_maddr(pa);
                     if (taint2_query(a)) {
