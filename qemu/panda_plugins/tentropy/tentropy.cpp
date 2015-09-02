@@ -190,8 +190,8 @@ void tentropy_open(CPUState *env, unsigned long pc, unsigned long va_fp, int fla
 void tentropy_close(CPUState *env,unsigned long pc, uint32_t fd){
   random_fds.erase(fd);
 }
-void tentropy_read(CPUState *env, unsigned long pc, uint32_t fd, target_ulong buf,unsigned int count){
-  static int label = 0;
+void tentropy_read(CPUState *env, unsigned long pc, uint32_t fd, target_ulong buf,target_ulong count){
+  static int label = 1;
   if(random_fds.count(fd) == 0)
     return;
   if(syscall_retval(env) != count){

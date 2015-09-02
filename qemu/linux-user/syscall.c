@@ -106,7 +106,7 @@ int __clone2(int (*fn)(void *), void *child_stack_base,
 #endif
 
 #include "panda_plugin.h"
-
+#include "pandalog.h"
 #if defined(CONFIG_USE_NPTL)
 #define CLONE_NPTL_FLAGS2 (CLONE_SETTLS | \
     CLONE_PARENT_SETTID | CLONE_CHILD_SETTID | CLONE_CHILD_CLEARTID)
@@ -6411,8 +6411,9 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
 #ifdef TARGET_GPROF
         _mcleanup();
 #endif
-
         panda_unload_plugins();
+        if(pandalog)
+          pandalog_close();
 
         gdb_exit(cpu_env, arg1);
         ret = get_errno(exit_group(arg1));

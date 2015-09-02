@@ -57,6 +57,7 @@
 #include "panda_plugin.h"
 
 int pandalog = 0;
+int  pandalog_close(void);
 
 char *exec_path;
 
@@ -3158,6 +3159,12 @@ static void handle_panda_plugin(const char *arg)
     if(!panda_load_plugin(panda_plugin_path(plugin_start)))
       fprintf(stderr, "WARN: Unable to load plugin `%s'\n", plugin_start);
 }
+static void handle_panda_log(const char *arg)
+{
+  pandalog = 1;
+  pandalog_open(arg, "w");
+  printf ("pandalogging to [%s]\n", optarg);
+}
 
 struct qemu_argument {
     const char *argv;
@@ -3214,6 +3221,8 @@ struct qemu_argument arg_table[] = {
 #endif
     {"panda-plugin", "QEMU_PANDA_PLUGIN", true, handle_panda_plugin,
      "",        "load PANDA plugin from <file>"},
+    {"pandalog", "QEMU_PANDA_LOG", true, handle_panda_log,
+     "",        "log to <file>"},
     {NULL, NULL, false, NULL, NULL, NULL}
 };
 

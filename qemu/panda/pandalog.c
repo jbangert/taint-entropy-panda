@@ -58,8 +58,8 @@ void pandalog_write_entry(Panda__LogEntry *entry) {
         entry->instr = rr_get_guest_instr_count ();
     }
     else {        
-        entry->pc = -1;
-        entry->instr = -1;
+         entry->pc = panda_current_pc(cpu_single_env);
+        //entry->instr = -1;
     }
 #else 
         entry->pc = -1;

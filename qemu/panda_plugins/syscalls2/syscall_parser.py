@@ -98,10 +98,15 @@ twoword_types = ["unsigned int", "unsigned long"]
 
 types_64 = ["loff_t", 'u64']
 stypes_32 = ["int", "long", '__s32', 'LONG']
-types_32 = ["unsigned int", "unsigned long", "size_t", 'u32', 'off_t', 'timer_t', 'key_t', 
+types_32 = ["unsigned int", "unsigned long",  'u32',  'timer_t', 'key_t', 
             'key_serial_t', 'mqd_t', 'clockid_t', 'aio_context_t', 'qid_t', 'old_sigset_t', 'union semun',
             'ULONG', 'SIZE_T', 'HANDLE', 'PBOOLEAN', 'PHANDLE', 'PLARGE_INTEGER', 'PLONG', 'PSIZE_T', 
             'PUCHAR', 'PULARGE_INTEGER', 'PULONG', 'PULONG_PTR', 'PUNICODE_STRING', 'PVOID', 'PWSTR']
+types_ptr = ["off_t", "size_t"]
+if ARCH=="x64":
+    types_64.extend(types_ptr)
+else:
+    types_32.extend(types_ptr)
 types_16 = ['old_uid_t', 'uid_t', 'mode_t', 'gid_t', 'pid_t', 'USHORT']
 types_pointer = ['cap_user_data_t', 'cap_user_header_t', '__sighandler_t', '...']
 

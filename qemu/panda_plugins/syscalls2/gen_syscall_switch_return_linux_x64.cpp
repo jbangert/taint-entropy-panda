@@ -22,7 +22,7 @@ void syscall_return_switch_linux_x64 ( CPUState *env, target_ulong pc, target_ul
 case 0: {
 uint32_t arg0 = get_return_32(env, 0);
 target_ulong arg1 = get_return_pointer(env, 1);
-uint32_t arg2 = get_return_32(env, 2);
+uint64_t arg2 = get_return_64(env, 2);
 PPP_RUN_CB(on_sys_read_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
 // 2 long sys_open [' const char __user *  filename', ' int  flags', ' umode_t  mode']
@@ -46,14 +46,14 @@ PPP_RUN_CB(on_sys_newfstat_return, env,pc,arg0,arg1) ;
 // 8 long sys_lseek [' unsigned int  fd', ' off_t  offset', ' unsigned int  origin']
 case 8: {
 uint32_t arg0 = get_return_32(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 uint32_t arg2 = get_return_32(env, 2);
 PPP_RUN_CB(on_sys_lseek_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
 // 11 long sys_munmap [' unsigned long  addr', ' size_t  len']
 case 11: {
 uint32_t arg0 = get_return_32(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 PPP_RUN_CB(on_sys_munmap_return, env,pc,arg0,arg1) ; 
 }; break;
 // 12 long sys_brk [' unsigned long  brk']
@@ -86,21 +86,21 @@ PPP_RUN_CB(on_sys_sched_yield_return, env,pc) ;
 // 26 long sys_msync [' unsigned long  start', ' size_t  len', ' int  flags']
 case 26: {
 uint32_t arg0 = get_return_32(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 int32_t arg2 = get_return_s32(env, 2);
 PPP_RUN_CB(on_sys_msync_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
 // 28 long sys_madvise [' unsigned long  start', ' size_t  len_in', ' int  behavior']
 case 28: {
 uint32_t arg0 = get_return_32(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 int32_t arg2 = get_return_s32(env, 2);
 PPP_RUN_CB(on_sys_madvise_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
 // 29 long sys_shmget [' key_t  key', ' size_t  size', ' int  shmflg']
 case 29: {
 uint32_t arg0 = get_return_32(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 int32_t arg2 = get_return_s32(env, 2);
 PPP_RUN_CB(on_sys_shmget_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
@@ -153,7 +153,7 @@ case 40: {
 int32_t arg0 = get_return_s32(env, 0);
 int32_t arg1 = get_return_s32(env, 1);
 target_ulong arg2 = get_return_pointer(env, 2);
-uint32_t arg3 = get_return_32(env, 3);
+uint64_t arg3 = get_return_64(env, 3);
 PPP_RUN_CB(on_sys_sendfile64_return, env,pc,arg0,arg1,arg2,arg3) ; 
 }; break;
 // 41 long sys_socket [' int  family', ' int  type', ' int  protocol']
@@ -519,13 +519,13 @@ PPP_RUN_CB(on_sys_capset_return, env,pc,arg0,arg1) ;
 // 127 long sys_rt_sigpending [' sigset_t __user *  set', ' size_t  sigsetsize']
 case 127: {
 target_ulong arg0 = get_return_pointer(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 PPP_RUN_CB(on_sys_rt_sigpending_return, env,pc,arg0,arg1) ; 
 }; break;
 // 130 long sys_rt_sigsuspend [' sigset_t __user *  unewset', ' size_t  sigsetsize']
 case 130: {
 target_ulong arg0 = get_return_pointer(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 PPP_RUN_CB(on_sys_rt_sigsuspend_return, env,pc,arg0,arg1) ; 
 }; break;
 // 132 long sys_utime [' char __user *  filename', ' struct utimbuf __user *  times']
@@ -614,13 +614,13 @@ PPP_RUN_CB(on_sys_sched_get_priority_min_return, env,pc,arg0) ;
 // 149 long sys_mlock [' unsigned long  start', ' size_t  len']
 case 149: {
 uint32_t arg0 = get_return_32(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 PPP_RUN_CB(on_sys_mlock_return, env,pc,arg0,arg1) ; 
 }; break;
 // 150 long sys_munlock [' unsigned long  start', ' size_t  len']
 case 150: {
 uint32_t arg0 = get_return_32(env, 0);
-uint32_t arg1 = get_return_32(env, 1);
+uint64_t arg1 = get_return_64(env, 1);
 PPP_RUN_CB(on_sys_munlock_return, env,pc,arg0,arg1) ; 
 }; break;
 // 151 long sys_mlockall [' int  flags']
@@ -703,7 +703,7 @@ PPP_RUN_CB(on_sys_gettid_return, env,pc) ;
 case 196: {
 int32_t arg0 = get_return_s32(env, 0);
 target_ulong arg1 = get_return_pointer(env, 1);
-uint32_t arg2 = get_return_32(env, 2);
+uint64_t arg2 = get_return_64(env, 2);
 PPP_RUN_CB(on_sys_flistxattr_return, env,pc,arg0,arg1,arg2) ; 
 }; break;
 // 199 long sys_fremovexattr [' int  fd', ' const char __user *  name']
@@ -835,7 +835,7 @@ PPP_RUN_CB(on_sys_unshare_return, env,pc,arg0) ;
 case 276: {
 int32_t arg0 = get_return_s32(env, 0);
 int32_t arg1 = get_return_s32(env, 1);
-uint32_t arg2 = get_return_32(env, 2);
+uint64_t arg2 = get_return_64(env, 2);
 uint32_t arg3 = get_return_32(env, 3);
 PPP_RUN_CB(on_sys_tee_return, env,pc,arg0,arg1,arg2,arg3) ; 
 }; break;
