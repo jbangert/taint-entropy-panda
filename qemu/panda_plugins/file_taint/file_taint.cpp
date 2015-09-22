@@ -133,7 +133,7 @@ uint32_t last_read_fd;
 uint32_t last_read_count;
 uint32_t last_read_buf;
 
-void read_enter(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint32_t count) { 
+void read_enter(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint64_t count) { 
     uint32_t asid = panda_current_asid(env);
     char *filename = 0;
     if (asidfd_to_filename.count(std::make_pair(asid, fd)) != 0) {
@@ -167,7 +167,7 @@ uint32_t file_pos = 0;
 
 // 3 long sys_read(unsigned int fd, char __user *buf, size_t count);
 // typedef void (*on_sys_read_return_t)(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint32_t count);
-void read_return(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint32_t count) { 
+void read_return(CPUState* env,target_ulong pc,uint32_t fd,target_ulong buf,uint64_t count) { 
     if (saw_read && panda_current_asid(env) == the_asid) {
         count = EAX;
         // These are the start and end of the current range of labels.

@@ -475,7 +475,7 @@ void lava_taint_query (PandaHypercallStruct phs) {
     extern CPUState *cpu_single_env;
     CPUState *env = cpu_single_env;
 
-    if  (taintEnabled && (taint2_num_labels_applied() > 0)){
+    if  (taintEnabled)){
             // ok at least one byte in the extent is tainted
             // 1. write the pandalog entry that tells us something was tainted on this extent
             Panda__TaintQueryHypercall *tqh = (Panda__TaintQueryHypercall *) malloc (sizeof (Panda__TaintQueryHypercall));
